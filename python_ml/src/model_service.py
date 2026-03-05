@@ -1,6 +1,5 @@
 import requests
-import json
-import python_ml.resources.raw_graph as raw_graph
+import python_ml.resources.graph as graph
 
 class ModelService:
     def __init__(self, model_name="deepseek-v3.1:671b-cloud", url="http://localhost:11434"):
@@ -18,63 +17,53 @@ class ModelService:
         except requests.exceptions.ConnectionError:
             print("Connection error")
 
-    def get_neighbors(self, states):
+    @staticmethod
+    def get_neighbors(states):
+        print("Getting neighbors...")
+
         neighbors = dict()
-        for state in states:
-            neighbors[state] = [raw_graph.db[state]]
+
+        for state_name in states:
+            state = graph.database[state_name]
+            neighbors[state_name] = state
 
         return neighbors
 
-
-    def create_prompt(self, cur_state, end_state, path, available_moves, file_name = None):
+    def create_prompt(self, cur_state, end_state, path, available_moves):
 
         available_neighbors = self.get_neighbors(available_moves)
         neighbors = ""
 
         for neighbor in available_neighbors:
-            neighbors += f"{neighbor} -> {available_moves[neighbor]}\n"
+            neighbors += f"{neighbor} -> {available_neighbors[neighbor]}\n"
 
-        prompt = f"""You are playing a game on a constellation graph.
+        prompt = f"""RULES:
+    1. Ur goal is to WIN
+    2. If u move to {end_state} - you WIN 
+    3. If ur opponent has no valid moves - they LOSE
+    4. U CANNOT move to *** in {path}
+    5. U can only move to DIRECTLY CONNECTED *** in {available_moves}
 
-    GAME RULES:
-    1. Your goal is to WIN (reach the target constellation {end_state})
-    2. If you move to {end_state} - you win immediately
-    3. If the opponent moves to {end_state} - they win immediately
-    4. If you have no valid moves - you lose
-    5. You CANNOT move to constellations in the PATH list
-    6. You can only move to DIRECTLY CONNECTED constellations (see graph)
+    DECISION PRIORITIES
 
-    CURRENT SITUATION:
-    • Target constellation: {end_state}
-    • Forbidden constellations: {path}
-    • Available moves: {available_moves}
+    1 - WIN:
+    - Check if {end_state} is in {available_moves}. If YES: MOVE TO
 
-    YOUR DECISION PRIORITIES (in order):
-
-    PRIORITY 1 - WIN IMMEDIATELY:
-    - Check if {end_state} is directly in available moves
-    - If YES: Move to {end_state} and win
-
-    PRIORITY 2 - BLOCK OPPONENT'S WIN:
-    - If you cannot win immediately, analyze each possible move
-    - For each candidate constellation C (connected to {cur_state} and not in PATH):
-      * Check if {end_state} is in C's neighbors
-      * If {end_state} is in C's neighbors → DANGER (opponent can win next turn)
-      * If {end_state} is NOT in C's neighbors → SAFE
-    - Choose a SAFE constellation if available
-
-    PRIORITY 3 - CONTROL & STRATEGY:
-    - If ALL safe moves are equivalent, consider:
-      * Choose constellation with FEWEST escape routes for opponent
-      * Choose constellation that leads toward {end_state} indirectly
-      * Choose constellation that limits opponent's future options
-
-    AVAILABLE NEIGBORS:
+    2 - BLOCK OPPONENT'S WIN:
+    - If u cannot win immediately, analyze possible moves
+    - For each candidate *** (connected to {cur_state} and not in {path}):
+      * If {end_state} is in ***'s neighbors → AVOID
+    - Choose a SAFE *** if available, else: random ***
+    
+    3 - CHECK FUTURE 
+    - if you go to ***, player goes to $$$ from *** and u have NO MOVES from $$$ - AVOID ***
+    
+    AVAILABLE MOVES: {available_moves} \n
     {neighbors}
     
-    ANSWER IN ONLY ONE WORD"""
+    ANSWER IN ONE WORD"""
 
-        return "\n".join(prompt)
+        return prompt
 
     def send_request(self, prompt):
 
@@ -99,22 +88,23 @@ class ModelService:
             print(e)
             return None
 
+    @staticmethod
+    def parse_response(raw_response):
+        print("Parsing response...")
 
-    def parse_response(self, raw_response):
-        if raw_response is None:
-            return "No response received"
-        if "response" in raw_response:
-            response = raw_response["response"].strip()
-            if "*" in response:
-                response = response.replace("*", "")
-            return response
-        else:
+        if raw_response is None or "response" not in raw_response:
             return "No response received"
 
+        response = raw_response["response"].strip()
+        if "*" in response:
+            response = response.replace("*", "")
 
-    def get_answer(self, cur_state, end_state, path, available_moves, file_name = None):
+        return response
+
+    def get_answer(self, cur_state, end_state, path, available_moves):
         print("Getting model answer...")
-        prompt = self.create_prompt(cur_state, end_state, path, available_moves, file_name)
+        prompt = self.create_prompt(cur_state, end_state, path, available_moves)
         raw_response = self.send_request(prompt)
         response = self.parse_response(raw_response)
         return response
+

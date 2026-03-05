@@ -86,3 +86,10 @@ Men = ['Cha', 'Vol', 'Dor', 'Hyi', 'Oct']
 Pav = ['Ind', 'Tel', 'Ara', 'Aps', 'Oct']
 Cha = ['Aps', 'Mus', 'Car', 'Men', 'Vol', 'Oct']
 Oct = ['Aps', 'Cha', 'Men', 'Hyi', 'Tuc', 'Ind', 'Pav']
+
+names = ['Lyr', 'Cyg', 'Vul', 'Sge', 'Aql', 'Her', 'Del', 'Dra', 'Aqr', 'Oph', 'Peg', 'Equ', 'Lac', 'Cep', 'CrB', 'Boo', 'Ser', 'UMa', 'Sct', 'UMi', 'Cam', 'Sco', 'Sgr', 'Cap', 'Lib', 'Vir', 'Leo', 'Com', 'CVn', 'Cas', 'And', 'Per', 'Tri', 'Psc', 'Ari', 'Aur', 'Tau', 'Cnc', 'Gem', 'Ori', 'Mon', 'CMi', 'Cet', 'Hya', 'Sex', 'Eri', 'LMi', 'Lyn', 'Crt', 'Crv', 'Lep', 'CMa', 'Pup', 'Pyx', 'Ant', 'Cen', 'Lup', 'Col', 'Cae', 'Ret', 'Hor', 'Car', 'Vel', 'Pic', 'Vol', 'Cru', 'Mus', 'Cir', 'Dor', 'PsA', 'Scl', 'For', 'Phe', 'Gru', 'Ind', 'Mic', 'Tel', 'CrA', 'Ara', 'Nor', 'TrA', 'Aps', 'Tuc', 'Hyi', 'Men', 'Pav', 'Cha', 'Oct']
+constellations = [Lyr, Cyg, Vul, Sge, Aql, Her, Del, Dra, Aqr, Oph, Peg, Equ, Lac, Cep, CrB, Boo, Ser, UMa, Sct, UMi, Cam, Sco, Sgr, Cap, Lib, Vir, Leo, Com, CVn, Cas, And, Per, Tri, Psc, Ari, Aur, Tau, Cnc, Gem, Ori, Mon, CMi, Cet, Hya, Sex, Eri, LMi, Lyn, Crt, Crv, Lep, CMa, Pup, Pyx, Ant, Cen, Lup, Col, Cae, Ret, Hor, Car, Vel, Pic, Vol, Cru, Mus, Cir, Dor, PsA, Scl, For, Phe, Gru, Ind, Mic, Tel, CrA, Ara, Nor, TrA, Aps, Tuc, Hyi, Men, Pav, Cha, Oct]
+database = dict()
+
+for i in range(len(constellations)):
+    database[names[i]] = constellations[i]
