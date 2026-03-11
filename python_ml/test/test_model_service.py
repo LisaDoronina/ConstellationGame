@@ -1,26 +1,28 @@
 from python_ml.src.model_service import ModelService
 from python_ml.src.main import MoveRequest as MoveRequest
+import python_ml.src.config as cfg
 
 class TestModelService:
 
-    def __init__(self, model_name: str, requests: list):
+    def __init__(self, requests: list, model_name: str = cfg.MODEL_NAME):
         self.requests = requests
         self.model_name = model_name
+        self.service = None
 
     def run_all_tests(self):
-        print(f"RUNNING TESTS\nusing model {model_name}\n")
+        print(f"RUNNING TESTS\nusing model {self.model_name}\n")
 
-        self.test_connection(model_name)
+        self.test_connection()
 
-        assert self.service != None, "CONNECTION FAILED :("
+        assert self.service is not None, "CONNECTION FAILED :("
 
         self.test_model_answer()
 
-    def test_connection(self, model_name):
+    def test_connection(self):
         print("* TESTING CONNECTION")
 
         try:
-            self.service = ModelService(model_name=model_name)
+            self.service = ModelService(model_name=cfg.MODEL_NAME)
             print("SUCCESS\n")
 
         except Exception as e:
@@ -31,6 +33,9 @@ class TestModelService:
         print("* TESTING MODEL ANSWERS")
         test_num = 1
         for request in self.requests:
+
+            print("-" * 20, f"\nTEST {test_num}\n\ncur: {request.cur_state}\nto: {request.end_state}\npath: {request.path}\navailable_moves: {request.available_moves}")
+
             answer = self.service.get_answer(
                 cur_state=request.cur_state,
                 end_state=request.end_state,
@@ -39,10 +44,10 @@ class TestModelService:
             )
 
             assert answer in request.available_moves, f"\nINVALID ANSWER:\n ANSWER: {answer}, AVAILABLE_MOVES: {request.available_moves}"
-            print(f"TEST {test_num} DONE") #если ответ корректен
+            print(f"answer: {answer} <- GOOD\n")
             test_num += 1
 
-        print(f"ALL TESTS PASSED SUCCESSFULLY\n")
+        print("-" * 20, f"\nALL TESTS PASSED SUCCESSFULLY\n")
 
 
 
@@ -80,8 +85,5 @@ if __name__ == "__main__":
             available_moves=['Cyg', 'Vul']
         )
     ]
-    model_name = "gemma3:12b"
-
-    test_model_service = TestModelService(requests=requests, model_name=model_name)
+    test_model_service = TestModelService(requests=requests, model_name=cfg.MODEL_NAME)
     test_model_service.run_all_tests()
-
