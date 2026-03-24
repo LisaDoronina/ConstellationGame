@@ -2,8 +2,7 @@ package com.game.auth.controller;
 
 import com.game.auth.dto.*;
 import com.game.auth.entity.User;
-import com.game.auth.service.AuthentificationService;
-import lombok.RequiredArgsConstructor;
+import com.game.auth.service.AuthenticationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,10 +13,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
-public class AuthentificationController {
+public class AuthController {
 
-  private final AuthentificationService authService;
+  private final AuthenticationService authService;
+
+  public AuthController(AuthenticationService authService) {
+    this.authService = authService;
+  }
 
   @PostMapping("/register")
   public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {

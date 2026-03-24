@@ -1,15 +1,7 @@
 package com.game.auth.dto;
 
-import lombok.Data;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 import jakarta.validation.constraints.*;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class RegisterRequest {
 
   @NotBlank(message = "Username is required")
@@ -18,7 +10,6 @@ public class RegisterRequest {
   private String username;
 
   @Email(message = "Email should be valid")
-  @Pattern(regexp = "^[A-Za-z0-9+_.-]+@(.+)$", message = "Invalid email format")
   private String email;
 
   @NotBlank(message = "Password is required")
@@ -27,4 +18,25 @@ public class RegisterRequest {
 
   @NotBlank(message = "Confirm password is required")
   private String confirmPassword;
+
+  public RegisterRequest() {}
+
+  public RegisterRequest(String username, String email, String password, String confirmPassword) {
+    this.username = username;
+    this.email = email;
+    this.password = password;
+    this.confirmPassword = confirmPassword;
+  }
+
+  public String getUsername() { return username; }
+  public void setUsername(String username) { this.username = username; }
+
+  public String getEmail() { return email; }
+  public void setEmail(String email) { this.email = email; }
+
+  public String getPassword() { return password; }
+  public void setPassword(String password) { this.password = password; }
+
+  public String getConfirmPassword() { return confirmPassword; }
+  public void setConfirmPassword(String confirmPassword) { this.confirmPassword = confirmPassword; }
 }

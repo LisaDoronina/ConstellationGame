@@ -3,23 +3,24 @@ package com.game.auth.service;
 import com.game.auth.dto.*;
 import com.game.auth.entity.User;
 import com.game.auth.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
-public class AuthentificationService {
+public class AuthenticationService {
 
   private final UserRepository userRepository;
   private final PasswordService passwordService;
   private final Map<String, String> tokenStore = new HashMap<>();
 
-  public User register(RegisterRequest request) {
+  public AuthenticationService(UserRepository userRepository, PasswordService passwordService) {
+    this.userRepository = userRepository;
+    this.passwordService = passwordService;
+  }
 
+  public User register(RegisterRequest request) {
     if (!passwordService.isStrongPassword(request.getPassword())) {
       throw new RuntimeException("Password must be at least 8 characters and contain uppercase, lowercase, digit, and special character");
     }
@@ -39,15 +40,14 @@ public class AuthentificationService {
 
     String passwordHash = passwordService.hashPassword(request.getPassword());
 
-    User user = User.builder()
-            .username(request.getUsername())
-            .email(request.getEmail())
-            .passwordHash(passwordHash)
-            .gameIds(new java.util.ArrayList<>())
-            .build();
+    User user = new User();
+    user.setUsername(request.getUsername());
+    user.setEmail(request.getEmail());
+    user.setPasswordHash(passwordHash);
+    user.setGameIds(new ArrayList<>());
 
     User savedUser = userRepository.save(user);
-    log.info("User registered successfully: {}", savedUser.getUsername());
+    System.out.println("[AuthenticationService] User registered successfully: " + savedUser.getUsername());
 
     return savedUser;
   }
@@ -56,30 +56,31 @@ public class AuthentificationService {
     Optional<User> userOptional = userRepository.getByUsernameOrEmail(request.getUsernameOrEmail());
 
     if (userOptional.isEmpty()) {
-      log.warn("Login failed: User not found - {}", request.getUsernameOrEmail());
+      System.out.println("[AuthenticationService] Login failed: User not found - " + request.getUsernameOrEmail());
       throw new RuntimeException("Invalid username/email or password");
     }
 
     User user = userOptional.get();
 
     if (!passwordService.verifyPassword(request.getPassword(), user.getPasswordHash())) {
-      log.warn("Login failed: Invalid password for user - {}", user.getUsername());
+      System.out.println("[AuthenticationService] Login failed: Invalid password for user - " + user.getUsername());
       throw new RuntimeException("Invalid username/email or password");
     }
 
-    String token = generateToken(user);
+    String token = UUID.randomUUID().toString();
     tokenStore.put(token, user.getUsername());
 
-    log.info("User logged in successfully: {}", user.getUsername());
+    System.out.println("[AuthenticationService] User logged in successfully: " + user.getUsername());
 
-    return AuthResponse.builder()
-            .token(token)
-            .type("Bearer")
-            .id(user.getId())
-            .username(user.getUsername())
-            .email(user.getEmail())
-            .gameIds(user.getGameIds())
-            .build();
+    AuthResponse response = new AuthResponse();
+    response.setToken(token);
+    response.setType("Bearer");
+    response.setId(user.getId());
+    response.setUsername(user.getUsername());
+    response.setEmail(user.getEmail());
+    response.setGameIds(user.getGameIds());
+
+    return response;
   }
 
   public void logout(String token) {
@@ -89,7 +90,7 @@ public class AuthentificationService {
 
     String username = tokenStore.remove(token);
     if (username != null) {
-      log.info("User logged out: {}", username);
+      System.out.println("[AuthenticationService] User logged out: " + username);
     }
   }
 
@@ -114,17 +115,13 @@ public class AuthentificationService {
     return tokenStore.containsKey(token);
   }
 
-  private String generateToken(User user) {
-    return UUID.randomUUID().toString() + "-" + user.getId();
-  }
-
   public void addGameToUser(Long userId, Long gameId) {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
     user.addGame(gameId);
     userRepository.save(user);
-    log.info("Game {} added to user {}", gameId, user.getUsername());
+    System.out.println("[AuthenticationService] Game " + gameId + " added to user " + user.getUsername());
   }
 
   public void removeGameFromUser(Long userId, Long gameId) {
@@ -133,7 +130,7 @@ public class AuthentificationService {
 
     user.removeGame(gameId);
     userRepository.save(user);
-    log.info("Game {} removed from user {}", gameId, user.getUsername());
+    System.out.println("[AuthenticationService] Game " + gameId + " removed from user " + user.getUsername());
   }
 
   public List<Long> getUserGames(Long userId) {

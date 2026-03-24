@@ -1,62 +1,50 @@
 package com.game.auth.entity;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Entity
-@Table(name = "users")
 public class User {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(unique = true, nullable = false)
   private String username;
 
-  @Column(unique = true)
   private String email;
 
-  @Column(name = "password_hash", nullable = false)
   private String passwordHash;
 
-  @ElementCollection
-  @CollectionTable(name = "user_games", joinColumns = @JoinColumn(name = "user_id"))
-  @Column(name = "game_id")
   private List<Long> gameIds = new ArrayList<>();
 
+  public User(String username, String email, String passwordHash) {
+    this.username = username;
+    this.email = email;
+    this.passwordHash = passwordHash;
+    this.gameIds = new ArrayList<>();
+  }
+
+  public User() {}
+
   public void addGame(Long gameId) {
-    if (gameIds == null) {
-      gameIds = new ArrayList<>();
-    }
-    if (!gameIds.contains(gameId)) {
-      gameIds.add(gameId);
-    }
+    if (gameIds == null) gameIds = new ArrayList<>();
+    if (!gameIds.contains(gameId)) gameIds.add(gameId);
   }
 
   public void removeGame(Long gameId) {
-    if (gameIds != null) {
-      gameIds.remove(gameId);
-    }
+    if (gameIds != null) gameIds.remove(gameId);
   }
 
-  public boolean hasGame(Long gameId) {
-    return gameIds != null && gameIds.contains(gameId);
-  }
+  public Long getId() { return id; }
+  public void setId(Long id) { this.id = id; }
+
+  public String getUsername() { return username; }
+  public void setUsername(String username) { this.username = username; }
+
+  public String getEmail() { return email; }
+  public void setEmail(String email) { this.email = email; }
+
+  public String getPasswordHash() { return passwordHash; }
+  public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+
+  public List<Long> getGameIds() { return gameIds; }
+  public void setGameIds(List<Long> gameIds) { this.gameIds = gameIds; }
 }

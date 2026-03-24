@@ -4,11 +4,15 @@ import com.game.auth.entity.User;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class UserRepository {
 
+  private final Map<Long, User> userStore = new ConcurrentHashMap<>();
+  private final Map<String, User> usernameIndex = new ConcurrentHashMap<>();
+  private final Map<String, User> emailIndex = new ConcurrentHashMap<>();
   private final AtomicLong idGenerator = new AtomicLong(1);
 
   public User save(User user) {
@@ -16,52 +20,102 @@ public class UserRepository {
       user.setId(idGenerator.getAndIncrement());
     }
 
-    //что-то типа database.save(user);
+    userStore.put(user.getId(), user);
+    usernameIndex.put(user.getUsername(), user);
+
+    if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+      emailIndex.put(user.getEmail(), user);
+    }
+
+    System.out.println("[UserRepository] Saved user: " + user.getUsername() + " with ID: " + user.getId());
+    System.out.println("[UserRepository] Total users: " + userStore.size());
 
     return user;
   }
 
   public Optional<User> findById(Long id) {
-    //return Optional.ofNullable(database.getById(id));
-    return Optional.empty();
+    User user = userStore.get(id);
+    if (user != null) {
+      System.out.println("[UserRepository] Found user by ID: " + id + " - " + user.getUsername());
+    } else {
+      System.out.println("[UserRepository] No user found with ID: " + id);
+    }
+    return Optional.ofNullable(user);
   }
 
   public Optional<User> getByUsername(String username) {
-    //return Optional.ofNullable(database.getByUsername(username));
-    return Optional.empty();
+    User user = usernameIndex.get(username);
+    if (user != null) {
+      System.out.println("[UserRepository] Found user by username: " + username);
+    } else {
+      System.out.println("[UserRepository] No user found with username: " + username);
+    }
+    return Optional.ofNullable(user);
   }
 
   public Optional<User> getByEmail(String email) {
-    //return Optional.ofNullable(database.getByEmail(email));
-    return Optional.empty();
+    User user = emailIndex.get(email);
+    if (user != null) {
+      System.out.println("[UserRepository] Found user by email: " + email);
+    } else {
+      System.out.println("[UserRepository] No user found with email: " + email);
+    }
+    return Optional.ofNullable(user);
   }
 
   public Optional<User> getByUsernameOrEmail(String usernameOrEmail) {
-    if (usernameOrEmail.contains("@")) {
-      return getByEmail(usernameOrEmail);
+    System.out.println("[UserRepository] Looking for: " + usernameOrEmail);
+
+    if (usernameOrEmail != null && !usernameOrEmail.isEmpty()) {
+      Optional<User> byUsername = getByUsername(usernameOrEmail);
+      if (byUsername.isPresent()) {
+        return byUsername;
+      }
+
+      if (usernameOrEmail.contains("@")) {
+        Optional<User> byEmail = getByEmail(usernameOrEmail);
+        if (byEmail.isPresent()) {
+          return byEmail;
+        }
+      }
     }
-    return getByUsername(usernameOrEmail);
+
+    System.out.println("[UserRepository] No user found for: " + usernameOrEmail);
+    return Optional.empty();
   }
 
   public boolean existsByUsername(String username) {
     if (username == null || username.isEmpty()) {
       return false;
     }
-    return getByUsername(username).isPresent();
+    boolean exists = usernameIndex.containsKey(username);
+    System.out.println("[UserRepository] Username exists check for '" + username + "': " + exists);
+    return exists;
   }
 
   public boolean existsByEmail(String email) {
     if (email == null || email.isEmpty()) {
       return false;
     }
-    return getByEmail(email).isPresent();
+    boolean exists = emailIndex.containsKey(email);
+    System.out.println("[UserRepository] Email exists check for '" + email + "': " + exists);
+    return exists;
   }
 
   public List<User> getAllUsers() {
-    return new ArrayList<>();
+    List<User> users = new ArrayList<>(userStore.values());
+    System.out.println("[UserRepository] Returning all users, count: " + users.size());
+    return users;
   }
 
   public void deleteById(Long id) {
-    //User user = database.remove(id);
+    User user = userStore.remove(id);
+    if (user != null) {
+      usernameIndex.remove(user.getUsername());
+      if (user.getEmail() != null) {
+        emailIndex.remove(user.getEmail());
+      }
+      System.out.println("[UserRepository] Deleted user: " + user.getUsername());
+    }
   }
 }

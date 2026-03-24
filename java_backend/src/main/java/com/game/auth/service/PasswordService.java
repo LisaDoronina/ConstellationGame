@@ -1,16 +1,16 @@
 package com.game.auth.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
 public class PasswordService {
 
   private final PasswordEncoder passwordEncoder;
+
+  public PasswordService(PasswordEncoder passwordEncoder) {
+    this.passwordEncoder = passwordEncoder;
+  }
 
   public String hashPassword(String password) {
     if (password == null || password.isEmpty()) {
@@ -18,8 +18,7 @@ public class PasswordService {
     }
 
     String hash = passwordEncoder.encode(password);
-    log.debug("Generated password hash for new user");
-
+    System.out.println("[PasswordService] Generated password hash");
     return hash;
   }
 
@@ -29,8 +28,7 @@ public class PasswordService {
     }
 
     boolean matches = passwordEncoder.matches(password, storedHash);
-    log.debug("Password verification result: " + matches);
-
+    System.out.println("[PasswordService] Password verification result: " + matches);
     return matches;
   }
 
