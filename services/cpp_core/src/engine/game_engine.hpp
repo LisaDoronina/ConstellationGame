@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../frontend/frontend_adapter.hpp"
+#include <nlohmann/json.hpp>
+#include <string>
+
 #include "../graph/constellation_graph.hpp"
 #include "../model/model_stub.hpp"
 #include "../state/game_state.hpp"
@@ -9,27 +11,19 @@ class GameEngine {
  public:
   GameEngine(ConstellationGraph graph);
 
-  void InitGame();
+  void InitGame(int lives);
+  void ProcessPlayerMove(const std::string& input);
+  void ProcessModelMove();
 
-  void Run();
+  nlohmann::json GetStateJson() const;
 
  private:
-  void PlayerTurn();
-
-  void ModelTurn();
-
-  bool ValidateMove(int from, int to);
-
-  bool IsDeadEnd(int node);
-
+  bool ValidateMove(int from, int to) const;
+  void ApplyMove(int move);
   void CheckGameOver();
 
  private:
   ConstellationGraph graph_;
-
   GameState state_;
-
-  ModelStub model_;
-
-  FrontendAdapter frontend_;
+  ModelService model_;
 };

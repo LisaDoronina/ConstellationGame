@@ -6,27 +6,25 @@
 
 class ConstellationGraph {
  public:
-  void LoadFromJson(const std::string& filename);
+  void LoadFromJson(const std::string& path);
+  void LoadNames(const std::string& path);
 
-  int GetId(const std::string& name) const;
+  int GetId(const std::string& short_name) const;
+  int GetIdFromFull(const std::string& full_name) const;
 
-  const std::string& GetName(int id) const;
+  std::string GetShortName(int id) const;
+  std::string GetFullName(int id) const;
 
-  const std::vector<int>& GetNeighbors(int id) const;
-
+  std::vector<int> GetNeighbors(int id) const;
   bool AreNeighbors(int a, int b) const;
 
   int GetRandomNode() const;
 
  private:
-  void AddConstellation(const std::string& name);
-
-  void AddEdge(int a, int b);
-
- private:
-  std::vector<std::string> names_;
-
-  std::unordered_map<std::string, int> name_to_id_;
-
   std::vector<std::vector<int>> adj_;
+
+  std::vector<std::string> short_names_;
+  std::vector<std::string> full_names_;
+
+  std::unordered_map<std::string, int> short_to_id_;
 };

@@ -1,10 +1,17 @@
 #include "game_engine.hpp"
 
-#include <iostream>
+#include <algorithm>
+
+using json = nlohmann::json;
 
 GameEngine::GameEngine(ConstellationGraph graph) : graph_(graph) {}
 
-void GameEngine::InitGame() {
+void GameEngine::InitGame(int lives) {
+  state_ = {};
+
+  state_.player_lives = lives;
+  state_.model_lives = lives;
+
   state_.start = graph_.GetRandomNode();
 
   do {
@@ -12,118 +19,139 @@ void GameEngine::InitGame() {
   } while (state_.finish == state_.start ||
            graph_.AreNeighbors(state_.start, state_.finish));
 
-  state_.player_pos = state_.start;
-  state_.model_pos = state_.start;
+  state_.current_pos = state_.start;
 
   state_.visited.insert(state_.start);
+  state_.path.push_back(state_.start);
 
-  state_.player_path.push_back(state_.start);
-  state_.model_path.push_back(state_.start);
+  state_.player_turn = true;
+  state_.game_over = false;
 }
 
-void GameEngine::Run() {
-  frontend_.SendState(state_, graph_);
+void GameEngine::ProcessPlayerMove(const std::string& input) {
+  if (!state_.player_turn || state_.game_over) return;
 
-  while (!state_.game_over) {
-    PlayerTurn();
+  int move = graph_.GetIdFromFull(input);
 
-    if (state_.game_over) break;
+  if (move == -1) return;
 
-    ModelTurn();
-
-    CheckGameOver();
-
-    frontend_.SendState(state_, graph_);
-  }
-
-  frontend_.SendResult(state_, graph_);
-}
-
-void GameEngine::PlayerTurn() {
-  while (true) {
-    std::string name;
-
-    std::cin >> name;
-
-    int move = graph_.GetId(name);
-
-    if (move == -1) {
-      std::cout << "Unknown constellation\n";
-      continue;
-    }
-
-    if (!ValidateMove(state_.player_pos, move)) {
-      std::cout << "Not a neighbor\n";
-      continue;
-    }
-
-    if (state_.visited.count(move)) {
-      state_.player_lives--;
-      std::cout << "Already visited\n";
-      return;
-    }
-
-    state_.player_pos = move;
-
-    state_.player_path.push_back(move);
-
-    state_.visited.insert(move);
-
-    return;
-  }
-}
-
-void GameEngine::ModelTurn() {
-  auto neighbors = graph_.GetNeighbors(state_.model_pos);
-
-  int move = model_.MakeMove(state_.model_pos, neighbors, state_.finish);
-
-  if (move == -1) {
-    state_.model_lives--;
-    return;
-  }
-
-  if (!ValidateMove(state_.model_pos, move)) {
-    state_.model_lives--;
-    return;
-  }
+  if (!ValidateMove(state_.current_pos, move)) return;
 
   if (state_.visited.count(move)) {
-    state_.model_lives--;
-    return;
+    state_.player_lives--;
+  } else {
+    ApplyMove(move);
   }
 
-  state_.model_pos = move;
+  state_.player_turn = false;
 
-  state_.model_path.push_back(move);
-
-  state_.visited.insert(move);
+  CheckGameOver();
 }
 
-bool GameEngine::ValidateMove(int from, int to) {
-  if (to < 0) return false;
+void GameEngine::ProcessModelMove() {
+  if (state_.player_turn || state_.game_over) return;
 
+  auto neighbor_ids = graph_.GetNeighbors(state_.current_pos);
+
+  std::vector<std::string> moves;
+  for (int id : neighbor_ids) moves.push_back(graph_.GetShortName(id));
+
+  std::vector<std::string> path;
+  for (int id : state_.path) path.push_back(graph_.GetShortName(id));
+
+  std::string cur = graph_.GetShortName(state_.current_pos);
+  std::string end = graph_.GetShortName(state_.finish);
+
+  std::string answer = model_.GetMove(cur, end, path, moves);
+
+  answer.erase(remove_if(answer.begin(), answer.end(), isspace), answer.end());
+
+  int move = graph_.GetId(answer);
+
+  if (move == -1 || !ValidateMove(state_.current_pos, move)) {
+    state_.model_lives--;
+  } else if (state_.visited.count(move)) {
+    state_.model_lives--;
+  } else {
+    ApplyMove(move);
+  }
+
+  state_.player_turn = true;
+
+  CheckGameOver();
+}
+
+bool GameEngine::ValidateMove(int from, int to) const {
+  if (to < 0) return false;
   return graph_.AreNeighbors(from, to);
 }
 
-bool GameEngine::IsDeadEnd(int node) {
-  for (int n : graph_.GetNeighbors(node)) {
-    if (!state_.visited.count(n)) return false;
-  }
-
-  return true;
+void GameEngine::ApplyMove(int move) {
+  state_.current_pos = move;
+  state_.path.push_back(move);
+  state_.visited.insert(move);
 }
 
 void GameEngine::CheckGameOver() {
-  if (state_.player_pos == state_.finish) state_.game_over = true;
+  if (state_.current_pos == state_.finish) {
+    state_.game_over = true;
+    return;
+  }
 
-  if (state_.model_pos == state_.finish) state_.game_over = true;
+  if (state_.player_lives <= 0 || state_.model_lives <= 0) {
+    state_.game_over = true;
+    return;
+  }
 
-  if (state_.player_lives <= 0) state_.game_over = true;
+  auto neighbors = graph_.GetNeighbors(state_.current_pos);
 
-  if (state_.model_lives <= 0) state_.game_over = true;
+  bool has_new_move = false;
 
-  if (IsDeadEnd(state_.player_pos)) state_.game_over = true;
+  for (int n : neighbors) {
+    if (!state_.visited.count(n)) {
+      has_new_move = true;
+      break;
+    }
+  }
 
-  if (IsDeadEnd(state_.model_pos)) state_.game_over = true;
+  if (!has_new_move) {
+    state_.game_over = true;
+  }
+}
+
+json GameEngine::GetStateJson() const {
+  json j;
+
+  j["start"] = graph_.GetFullName(state_.start);
+  j["finish"] = graph_.GetFullName(state_.finish);
+  j["current"] = graph_.GetFullName(state_.current_pos);
+
+  j["player_lives"] = state_.player_lives;
+  j["model_lives"] = state_.model_lives;
+
+  j["player_turn"] = state_.player_turn;
+  j["game_over"] = state_.game_over;
+
+  std::vector<std::string> path;
+  for (int id : state_.path) path.push_back(graph_.GetShortName(id));
+
+  j["path"] = path;
+
+  if (state_.game_over) {
+    if (state_.current_pos == state_.finish) {
+      j["winner"] = "player";
+    } else if (state_.player_lives <= 0) {
+      j["winner"] = "model";
+    } else if (state_.model_lives <= 0) {
+      j["winner"] = "player";
+    } else {
+      if (state_.player_turn) {
+        j["winner"] = "model";
+      } else {
+        j["winner"] = "player";
+      }
+    }
+  }
+
+  return j;
 }

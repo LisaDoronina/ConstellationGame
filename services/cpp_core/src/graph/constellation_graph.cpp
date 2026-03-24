@@ -1,71 +1,80 @@
 #include "constellation_graph.hpp"
 
-#include <algorithm>
-#include <cstdlib>
 #include <fstream>
-#include <iostream>
 #include <nlohmann/json.hpp>
+#include <random>
 
 using json = nlohmann::json;
 
-void ConstellationGraph::LoadFromJson(const std::string& filename) {
-  std::ifstream file(filename);
+void ConstellationGraph::LoadFromJson(const std::string& path) {
+  std::ifstream file(path);
+  json j;
+  file >> j;
 
-  json data;
+  int id = 0;
 
-  file >> data;
-
-  for (auto& [name, _] : data.items()) {
-    AddConstellation(name);
+  for (auto& [name, _] : j.items()) {
+    short_to_id_[name] = id++;
+    short_names_.push_back(name);
   }
 
-  for (auto& [name, neighbors] : data.items()) {
-    int id = GetId(name);
+  adj_.resize(short_names_.size());
+
+  for (auto& [name, neighbors] : j.items()) {
+    int from = short_to_id_[name];
 
     for (auto& n : neighbors) {
-      int nid = GetId(n);
-
-      if (nid == -1) {
-        continue;
-      }
-
-      AddEdge(id, nid);
+      adj_[from].push_back(short_to_id_[n]);
     }
   }
 }
 
-void ConstellationGraph::AddConstellation(const std::string& name) {
-  name_to_id_[name] = names_.size();
+void ConstellationGraph::LoadNames(const std::string& path) {
+  std::ifstream file(path);
+  json j;
+  file >> j;
 
-  names_.push_back(name);
+  full_names_.resize(short_names_.size());
 
-  adj_.push_back({});
+  for (auto& [short_name, full_name] : j.items()) {
+    int id = short_to_id_[short_name];
+    full_names_[id] = full_name;
+  }
 }
 
-void ConstellationGraph::AddEdge(int a, int b) {
-  adj_[a].push_back(b);
-  adj_[b].push_back(a);
-}
-int ConstellationGraph::GetId(const std::string& name) const {
-  auto it = name_to_id_.find(name);
-
-  if (it == name_to_id_.end()) return -1;
-
-  return it->second;
+int ConstellationGraph::GetId(const std::string& short_name) const {
+  auto it = short_to_id_.find(short_name);
+  return it == short_to_id_.end() ? -1 : it->second;
 }
 
-const std::string& ConstellationGraph::GetName(int id) const {
-  return names_[id];
+int ConstellationGraph::GetIdFromFull(const std::string& full_name) const {
+  for (int i = 0; i < full_names_.size(); ++i) {
+    if (full_names_[i] == full_name) return i;
+  }
+  return -1;
 }
 
-const std::vector<int>& ConstellationGraph::GetNeighbors(int id) const {
+std::string ConstellationGraph::GetShortName(int id) const {
+  return short_names_[id];
+}
+
+std::string ConstellationGraph::GetFullName(int id) const {
+  return full_names_[id];
+}
+
+std::vector<int> ConstellationGraph::GetNeighbors(int id) const {
   return adj_[id];
 }
 
 bool ConstellationGraph::AreNeighbors(int a, int b) const {
-  const auto& neighbors = adj_[a];
-
-  return std::find(neighbors.begin(), neighbors.end(), b) != neighbors.end();
+  for (int x : adj_[a]) {
+    if (x == b) return true;
+  }
+  return false;
 }
 
-int ConstellationGraph::GetRandomNode() const { return rand() % names_.size(); }
+int ConstellationGraph::GetRandomNode() const {
+  static std::mt19937 gen(std::random_device{}());
+  std::uniform_int_distribution<> dist(0, adj_.size() - 1);
+  return dist(gen);
+}

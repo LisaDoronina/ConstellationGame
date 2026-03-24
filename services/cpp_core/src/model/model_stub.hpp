@@ -1,8 +1,11 @@
 #pragma once
 
+#include <string>
 #include <vector>
 
-class ModelStub {
+class ModelService {
  public:
-  int MakeMove(int current, const std::vector<int>& neighbors, int finish);
+  std::string GetMove(const std::string& cur, const std::string& end,
+                      const std::vector<std::string>& path,
+                      const std::vector<std::string>& moves);
 };

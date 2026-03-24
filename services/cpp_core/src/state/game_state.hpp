@@ -7,16 +7,14 @@ struct GameState {
   int start;
   int finish;
 
-  int player_pos;
-  int model_pos;
+  int current_pos;
 
-  int player_lives = 3;
-  int model_lives = 3;
+  int player_lives;
+  int model_lives;
 
-  std::vector<int> player_path;
-  std::vector<int> model_path;
-
+  std::vector<int> path;
   std::unordered_set<int> visited;
 
+  bool player_turn = true;
   bool game_over = false;
 };
