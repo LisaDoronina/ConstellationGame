@@ -1,102 +1,104 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
+import argparse
+import json
+from pathlib import Path
 
-f = pd.read_csv("constellation_boundaries.txt", delimiter = '|')
-fill_names = pd.read_csv("path.txt", header=None)[0].str.strip().str.upper().values
-const = np.array(f[" const"])
-ra = np.array([])
-dec = np.array(f[' dec ']).astype(float)
-for i in range(np.size(np.array(f["h "]))):
-    cur = np.array(f["h "])[i].split()
-    ra = np.append(ra, 15* (float(cur[0]) + float(cur[1]) / 60. + float(cur[2]) / 3600.))
-    const[i] = const[i].replace(' ', '')
-constellations = [
-    'AND', 'ANT', 'APS', 'AQR', 'AQL', 'ARA', 'ARI', 'AUR', 'BOO', 'CAE',
-    'CAM', 'CAP', 'CAR', 'CAS', 'CEN', 'CEP', 'CET', 'CHA', 'CIR', 'CMA',
-    'CMI', 'CNC', 'COL', 'COM', 'CRA', 'CRB', 'CRT', 'CRU', 'CRV', 'CVN',
-    'CYG', 'DEL', 'DOR', 'DRA', 'EQU', 'ERI', 'FOR', 'GEM', 'GRU', 'HER',
-    'HOR', 'HYA', 'HYI', 'IND', 'LAC', 'LEO', 'LEP', 'LIB', 'LMI', 'LUP',
-    'LYN', 'LYR', 'MEN', 'MIC', 'MON', 'MUS', 'NOR', 'OCT', 'OPH', 'ORI',
-    'PAV', 'PEG', 'PER', 'PHE', 'PIC', 'PSA', 'PSC', 'PUP', 'PYX', 'RET',
-    'SCL', 'SCO', 'SCT', 'SER', 'SEX', 'SGE', 'SGR', 'TAU', 'TEL', 'TRA',
-    'TRI', 'TUC', 'UMA', 'UMI', 'VEL', 'VIR', 'VOL', 'VUL',
+import matplotlib
+import numpy as np
+import pandas as pd
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+
+DATA_DIR = Path(__file__).resolve().parent
+BOUNDARIES_PATH = DATA_DIR / "constellation_boundaries.txt"
+NAMES_PATH = DATA_DIR.parent / "cpp_core" / "data" / "names.json"
+
+CONSTELLATIONS = [
+    "AND", "ANT", "APS", "AQR", "AQL", "ARA", "ARI", "AUR", "BOO", "CAE",
+    "CAM", "CAP", "CAR", "CAS", "CEN", "CEP", "CET", "CHA", "CIR", "CMA",
+    "CMI", "CNC", "COL", "COM", "CRA", "CRB", "CRT", "CRU", "CRV", "CVN",
+    "CYG", "DEL", "DOR", "DRA", "EQU", "ERI", "FOR", "GEM", "GRU", "HER",
+    "HOR", "HYA", "HYI", "IND", "LAC", "LEO", "LEP", "LIB", "LMI", "LUP",
+    "LYN", "LYR", "MEN", "MIC", "MON", "MUS", "NOR", "OCT", "OPH", "ORI",
+    "PAV", "PEG", "PER", "PHE", "PIC", "PSA", "PSC", "PUP", "PYX", "RET",
+    "SCL", "SCO", "SCT", "SER", "SEX", "SGE", "SGR", "TAU", "TEL", "TRA",
+    "TRI", "TUC", "UMA", "UMI", "VEL", "VIR", "VOL", "VUL",
 ]
-def fill_segment_to_edge(sra, sdec, color='#00e600', alpha=0.2, zorder=1):
+
+
+def load_boundaries():
+    frame = pd.read_csv(BOUNDARIES_PATH, delimiter="|")
+    const = np.array(frame[" const"])
+    dec = np.array(frame[" dec "]).astype(float)
+    ra = np.array([])
+
+    for i in range(np.size(np.array(frame["h "]))):
+        current = np.array(frame["h "])[i].split()
+        ra = np.append(
+            ra,
+            15
+            * (
+                float(current[0])
+                + float(current[1]) / 60.0
+                + float(current[2]) / 3600.0
+            ),
+        )
+        const[i] = const[i].replace(" ", "")
+
+    return const, ra, dec
+
+
+def load_name_mapping():
+    with open(NAMES_PATH, "r", encoding="utf-8") as file:
+        short_to_full = json.load(file)
+
+    full_to_short = {full.upper(): short.upper() for short, full in short_to_full.items()}
+    return full_to_short
+
+
+def normalize_path(path_items):
+    full_to_short = load_name_mapping()
+    normalized = []
+
+    for item in path_items:
+        upper_item = item.strip().upper()
+        normalized.append(full_to_short.get(upper_item, upper_item))
+
+    return normalized
+
+
+def fill_segment_to_edge(axis, sra, sdec, color="#00e600", alpha=0.2, zorder=1):
     sra = np.asarray(sra)
     sdec = np.asarray(sdec)
 
-    # сегмент у левого края карты (RA = 360)
     if np.isclose(sra[0], 360) and np.isclose(sra[-1], 360):
         poly_ra = np.concatenate([sra, [360]])
         poly_dec = np.concatenate([sdec, [sdec[0]]])
-        plt.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
-
-    # сегмент у правого края карты (RA = 0)
+        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
     elif np.isclose(sra[0], 0) and np.isclose(sra[-1], 0):
         poly_ra = np.concatenate([sra, [0]])
         poly_dec = np.concatenate([sdec, [sdec[0]]])
-        plt.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
-
-    # если сегмент начинается у 360 и заканчивается не у 360
+        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
     elif np.isclose(sra[0], 360):
         poly_ra = np.concatenate([sra, [360, 360]])
         poly_dec = np.concatenate([sdec, [sdec[-1], sdec[0]]])
-        plt.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
-
-    # если сегмент заканчивается у 360
+        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
     elif np.isclose(sra[-1], 360):
         poly_ra = np.concatenate([sra, [360, sra[0]]])
         poly_dec = np.concatenate([sdec, [sdec[0], sdec[0]]])
-        plt.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
-
-    # если сегмент начинается у 0
+        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
     elif np.isclose(sra[0], 0):
         poly_ra = np.concatenate([sra, [0, 0]])
         poly_dec = np.concatenate([sdec, [sdec[-1], sdec[0]]])
-        plt.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
-
-    # если сегмент заканчивается у 0
+        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
     elif np.isclose(sra[-1], 0):
         poly_ra = np.concatenate([sra, [0, sra[0]]])
         poly_dec = np.concatenate([sdec, [sdec[0], sdec[0]]])
-        plt.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
-
+        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
     else:
-        # обычный случай без шва
-        plt.fill(sra, sdec, color=color, alpha=alpha, zorder=zorder)
-def constellation_center_largest_segment(racur, deccur):
-    racur = np.asarray(racur)
-    deccur = np.asarray(deccur)
+        axis.fill(sra, sdec, color=color, alpha=alpha, zorder=zorder)
 
-    if len(racur) == 0:
-        return np.nan, np.nan
-
-    # если разрыва по краю нет — обычный центр
-    if np.max(racur) - np.min(racur) <= 180:
-        return np.mean(racur), np.mean(deccur)
-
-    # делим точки на 2 сегмента: "около 0" и "около 360"
-    left_mask = racur < 180
-    right_mask = racur >= 180
-
-    n_left = np.sum(left_mask)
-    n_right = np.sum(right_mask)
-
-    # берём сегмент, где больше точек
-    if n_left > n_right:
-        return np.mean(racur[left_mask]), np.mean(deccur[left_mask])
-    elif n_right > n_left:
-        return np.mean(racur[right_mask]), np.mean(deccur[right_mask])
-    else:
-        # если точек поровну, можно взять сегмент с меньшим RA-разбросом
-        spread_left = np.ptp(racur[left_mask]) if n_left > 0 else np.inf
-        spread_right = np.ptp(racur[right_mask]) if n_right > 0 else np.inf
-
-        if spread_left <= spread_right:
-            return np.mean(racur[left_mask]), np.mean(deccur[left_mask])
-        else:
-            return np.mean(racur[right_mask]), np.mean(deccur[right_mask])
 
 def center_one_half_prefer_right(racur, deccur):
     racur = np.asarray(racur)
@@ -105,27 +107,23 @@ def center_one_half_prefer_right(racur, deccur):
     if len(racur) == 0:
         return np.nan, np.nan
 
-    # если шва нет, обычный центр
     if np.max(racur) - np.min(racur) <= 180:
         return np.mean(racur), np.mean(deccur)
 
-    # правая сторона картинки при xlim(360, 0) соответствует малым RA (~0h)
     right_mask = racur < 180
     left_mask = racur >= 180
 
     n_right = np.sum(right_mask)
     n_left = np.sum(left_mask)
 
-    # при равенстве предпочитаем правую сторону (~0h)
     if n_right >= n_left and n_right > 0:
         return np.mean(racur[right_mask]), np.mean(deccur[right_mask])
-    elif n_left > 0:
+    if n_left > 0:
         return np.mean(racur[left_mask]), np.mean(deccur[left_mask])
-    else:
-        return np.mean(racur), np.mean(deccur)
+    return np.mean(racur), np.mean(deccur)
 
 
-def plot_wrapped_line(x, y, **kwargs):
+def plot_wrapped_line(axis, x, y, **kwargs):
     x = np.asarray(x)
     y = np.asarray(y)
 
@@ -140,122 +138,128 @@ def plot_wrapped_line(x, y, **kwargs):
         y1, y2 = y[i - 1], y[i]
 
         if abs(x2 - x1) > 180:
-            if x1 > x2:  # 350 -> 10
+            if x1 > x2:
                 t = (360 - x1) / ((x2 + 360) - x1)
                 y_cross = y1 + t * (y2 - y1)
-
                 seg_x.append(360)
                 seg_y.append(y_cross)
-                plt.plot(seg_x, seg_y, **kwargs)
-
+                axis.plot(seg_x, seg_y, **kwargs)
                 seg_x = [0, x2]
                 seg_y = [y_cross, y2]
-
-            else:        # 10 -> 350
+            else:
                 t = (0 - x1) / ((x2 - 360) - x1)
                 y_cross = y1 + t * (y2 - y1)
-
                 seg_x.append(0)
                 seg_y.append(y_cross)
-                plt.plot(seg_x, seg_y, **kwargs)
-
+                axis.plot(seg_x, seg_y, **kwargs)
                 seg_x = [360, x2]
                 seg_y = [y_cross, y2]
         else:
             seg_x.append(x2)
             seg_y.append(y2)
 
-    plt.plot(seg_x, seg_y, **kwargs)
-# РАБОЧИЙ 2
-centers_ra = []
-centers_dec = []
+    axis.plot(seg_x, seg_y, **kwargs)
 
-for i in range(88):
-    ins = np.where(const == constellations[i])[0]
-    racur = ra[ins]
-    deccur = dec[ins]
 
-    if len(racur) < 2:
-        continue
+def build_path_image(path_items, output_path):
+    const, ra, dec = load_boundaries()
+    fill_names = normalize_path(path_items)
 
-    rac = np.append(racur, racur[0])
-    decp = np.append(deccur, deccur[0])
+    figure, axis = plt.subplots(figsize=(12, 6), facecolor="#090b17")
+    centers_ra = []
+    centers_dec = []
+    center_names = []
 
-    seg_ra = [rac[0]]
-    seg_dec = [decp[0]]
-    segments = []
+    for constellation in CONSTELLATIONS:
+        indices = np.where(const == constellation)[0]
+        racur = ra[indices]
+        deccur = dec[indices]
 
-    if np.isin(constellations[i], fill_names) and len(racur) > 0:
-        if constellations[i] == 'SCL':
-            cra, cdec = 10.4, -32.12
-        else:
-            cra, cdec = center_one_half_prefer_right(racur, deccur)
+        if len(racur) < 2:
+            continue
 
-        centers_ra.append(cra)
-        centers_dec.append(cdec)
+        rac = np.append(racur, racur[0])
+        decp = np.append(deccur, deccur[0])
 
-    for k in range(1, len(rac)):
-        ra1, ra2 = rac[k - 1], rac[k]
-        dec1, dec2 = decp[k - 1], decp[k]
+        seg_ra = [rac[0]]
+        seg_dec = [decp[0]]
+        segments = []
 
-        if abs(ra2 - ra1) > 180:
-            if ra1 > ra2:   # e.g. 350 -> 10
-                t = (360 - ra1) / ((ra2 + 360) - ra1)
-                dec_cross = dec1 + t * (dec2 - dec1)
+        if constellation in fill_names and len(racur) > 0:
+            if constellation == "SCL":
+                cra, cdec = 10.4, -32.12
+            else:
+                cra, cdec = center_one_half_prefer_right(racur, deccur)
 
-                seg_ra.append(360)
-                seg_dec.append(dec_cross)
-                segments.append((np.array(seg_ra), np.array(seg_dec)))
+            centers_ra.append(cra)
+            centers_dec.append(cdec)
+            center_names.append(constellation)
 
-                seg_ra = [0, ra2]
-                seg_dec = [dec_cross, dec2]
+        for i in range(1, len(rac)):
+            ra1, ra2 = rac[i - 1], rac[i]
+            dec1, dec2 = decp[i - 1], decp[i]
 
-            else:           # e.g. 10 -> 350
-                t = (0 - ra1) / ((ra2 - 360) - ra1)
-                dec_cross = dec1 + t * (dec2 - dec1)
+            if abs(ra2 - ra1) > 180:
+                if ra1 > ra2:
+                    t = (360 - ra1) / ((ra2 + 360) - ra1)
+                    dec_cross = dec1 + t * (dec2 - dec1)
+                    seg_ra.append(360)
+                    seg_dec.append(dec_cross)
+                    segments.append((np.array(seg_ra), np.array(seg_dec)))
+                    seg_ra = [0, ra2]
+                    seg_dec = [dec_cross, dec2]
+                else:
+                    t = (0 - ra1) / ((ra2 - 360) - ra1)
+                    dec_cross = dec1 + t * (dec2 - dec1)
+                    seg_ra.append(0)
+                    seg_dec.append(dec_cross)
+                    segments.append((np.array(seg_ra), np.array(seg_dec)))
+                    seg_ra = [360, ra2]
+                    seg_dec = [dec_cross, dec2]
+            else:
+                seg_ra.append(ra2)
+                seg_dec.append(dec2)
 
-                seg_ra.append(0)
-                seg_dec.append(dec_cross)
-                segments.append((np.array(seg_ra), np.array(seg_dec)))
+        segments.append((np.array(seg_ra), np.array(seg_dec)))
+        for sra, sdec in segments:
+            axis.plot(sra, sdec, lw=0.7, color="white", alpha=0.75)
+            if constellation in fill_names:
+                fill_segment_to_edge(axis, sra, sdec, color="#29d17d", alpha=0.18, zorder=0)
 
-                seg_ra = [360, ra2]
-                seg_dec = [dec_cross, dec2]
-        else:
-            seg_ra.append(ra2)
-            seg_dec.append(dec2)
+    if centers_ra and centers_dec:
+        order = [center_names.index(name) for name in fill_names if name in center_names]
+        order = np.array(order)
+        plot_wrapped_line(
+            axis,
+            np.array(centers_ra)[order],
+            np.array(centers_dec)[order],
+            color="#29d17d",
+            linewidth=2.5,
+            zorder=10,
+        )
 
-    segments.append((np.array(seg_ra), np.array(seg_dec)))
-    for idx, (sra, sdec) in enumerate(segments):
-        plt.plot(sra, sdec, lw=1, color='white')
-    
-        if np.isin(constellations[i], fill_names):
-            fill_segment_to_edge(sra, sdec, color='#00e600', alpha=0.2, zorder=0)
+    axis.set_facecolor("#090b17")
+    axis.set_xlim(360, 0)
+    axis.set_ylim(-90, 90)
+    axis.set_xticks([])
+    axis.set_yticks([])
+    for spine in axis.spines.values():
+        spine.set_visible(False)
 
-centers_ra = np.array(centers_ra)
-centers_dec = np.array(centers_dec)
-path_names = fill_names
+    plt.tight_layout()
+    figure.savefig(output_path, dpi=200, bbox_inches="tight", facecolor=figure.get_facecolor())
+    plt.close(figure)
 
-center_names = []
-for name in constellations:
-    if name in fill_names:
-        ins = np.where(const == name)[0]
-        if len(ins) > 0:
-            center_names.append(name)
 
-order = []
-for name in path_names:
-    if name in center_names:
-        order.append(center_names.index(name))
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--path-json", required=True, help="JSON array with path items")
+    parser.add_argument("--output", required=True, help="Output PNG path")
+    args = parser.parse_args()
 
-order = np.array(order)
+    path_items = json.loads(args.path_json)
+    build_path_image(path_items, args.output)
 
-plot_wrapped_line(
-    centers_ra[order],
-    centers_dec[order],
-    color='#009600',
-    linewidth=2.5,
-    zorder=10
-)
-plt.gca().set_facecolor('black')
-plt.xlim(360, 0)
-plt.ylim(-90, 90)
+
+if __name__ == "__main__":
+    main()

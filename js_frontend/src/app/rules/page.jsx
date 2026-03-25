@@ -9,68 +9,66 @@ function RulesContent() {
   const returnTo = searchParams.get("returnTo")
 
   return (
-    <main className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-8 relative">
-      {/* Back button - top right with padding */}
-      <Link
-        href={returnTo || "/"}
-        className="fixed top-6 right-8 text-2xl font-display text-muted-foreground hover:text-foreground transition-all duration-200 uppercase tracking-widest z-50"
-      >
-        Назад
-      </Link>
+    <main className="min-h-screen bg-background px-8 py-8 md:px-14 md:py-10">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col">
+        <div className="mt-2 flex items-end justify-between gap-8">
+          <div className="translate-y-1 text-4xl text-zinc-300 md:text-5xl">*User*</div>
 
-      <header className="text-center mb-10">
-        <h1 className="text-5xl md:text-6xl font-display tracking-widest text-foreground mb-4 drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
-          ПРАВИЛА
-        </h1>
-        <div className="w-12 h-px bg-foreground/30 mx-auto" />
-      </header>
+          <h1 className="translate-y-1 whitespace-nowrap text-center text-6xl uppercase tracking-[0.22em] text-foreground md:text-7xl">
+            Правила
+          </h1>
 
-      <div className="max-w-xl text-center space-y-6">
-        <section>
-          <h2 className="text-2xl font-display tracking-wide text-foreground mb-2 uppercase">
-            Цель игры
-          </h2>
-          <p className="text-base text-muted-foreground leading-relaxed tracking-wide">
-            Дойти от начального созвездия до конечного, перемещаясь только по соседним созвездиям.
-            Побеждает тот, кто первым достигнет финишного созвездия.
-          </p>
-        </section>
+          <Link
+            href={returnTo || "/"}
+            className="translate-y-1 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:scale-110 hover:text-white md:text-5xl"
+          >
+            Назад
+          </Link>
+        </div>
 
-        <div className="w-16 h-px bg-foreground/20 mx-auto" />
+        <div className="mt-16 flex flex-1 flex-col gap-10 md:mt-20">
+          <section>
+            <h2 className="mb-4 whitespace-nowrap text-5xl font-bold uppercase tracking-[0.18em] text-foreground">
+              Цель игры
+            </h2>
+            <div className="mb-6 h-px w-full bg-foreground/20" />
+            <p className="max-w-5xl text-4xl tracking-[0.08em] text-zinc-400">
+              Дойти от начального созвездия до конечного, перемещаясь только по соседним созвездиям.
+              Побеждает тот, кто первым достигает финиша.
+            </p>
+          </section>
 
-        <section>
-          <h2 className="text-2xl font-display tracking-wide text-foreground mb-2 uppercase">
-            Ход игры
-          </h2>
-          <p className="text-base text-muted-foreground leading-relaxed tracking-wide">
-            Вы и ИИ по очереди называете созвездия. Каждое названное созвездие должно быть
-            соседним с текущим и ещё не использованным в этой партии.
-          </p>
-        </section>
+          <section>
+            <h2 className="mb-4 whitespace-nowrap text-5xl font-bold uppercase tracking-[0.18em] text-foreground">
+              Ход игры
+            </h2>
+            <div className="mb-6 h-px w-full bg-foreground/20" />
+            <p className="max-w-5xl text-4xl tracking-[0.08em] text-zinc-400">
+              Вы и ИИ по очереди называете созвездия. Ход должен вести в соседнее созвездие.
+            </p>
+          </section>
 
-        <div className="w-16 h-px bg-foreground/20 mx-auto" />
+          <section>
+            <h2 className="mb-4 whitespace-nowrap text-5xl font-bold uppercase tracking-[0.18em] text-foreground">
+              Ошибки
+            </h2>
+            <div className="mb-6 h-px w-full bg-foreground/20" />
+            <p className="max-w-5xl text-4xl tracking-[0.08em] text-zinc-400">
+              Неверный ход, уже использованное или несуществующее созвездие отнимает одну жизнь.
+            </p>
+          </section>
 
-        <section>
-          <h2 className="text-2xl font-display tracking-wide text-foreground mb-2 uppercase">
-            Ошибки
-          </h2>
-          <p className="text-base text-muted-foreground leading-relaxed tracking-wide">
-            При неверном ходе (несоседнее созвездие, уже использованное или несуществующее)
-            вы теряете одну жизнь. Когда жизни заканчиваются — игра проиграна.
-          </p>
-        </section>
-
-        <div className="w-16 h-px bg-foreground/20 mx-auto" />
-
-        <section>
-          <h2 className="text-2xl font-display tracking-wide text-foreground mb-2 uppercase">
-            Победа и поражение
-          </h2>
-          <p className="text-base text-muted-foreground leading-relaxed tracking-wide">
-            Игра завершается, когда кто-то достигает конечного созвездия, у одной из сторон
-            не остаётся допустимых ходов, или когда вы решите завершить игру досрочно.
-          </p>
-        </section>
+          <section>
+            <h2 className="mb-4 whitespace-nowrap text-5xl font-bold uppercase tracking-[0.18em] text-foreground">
+              Победа и поражение
+            </h2>
+            <div className="mb-6 h-px w-full bg-foreground/20" />
+            <p className="max-w-5xl text-4xl tracking-[0.08em] text-zinc-400">
+              Игра завершается, когда кто-то достигает финишного созвездия, когда заканчиваются жизни
+              или когда больше нет допустимых ходов.
+            </p>
+          </section>
+        </div>
       </div>
     </main>
   )
@@ -78,11 +76,13 @@ function RulesContent() {
 
 export default function RulesPage() {
   return (
-    <Suspense fallback={
-      <main className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Загрузка...</p>
-      </main>
-    }>
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-background flex items-center justify-center">
+          <p className="text-4xl tracking-[0.08em] text-zinc-400">Загрузка...</p>
+        </main>
+      }
+    >
       <RulesContent />
     </Suspense>
   )

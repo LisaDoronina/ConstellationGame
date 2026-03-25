@@ -172,7 +172,7 @@ function GameContent() {
     
     const inputLower = input.toLowerCase()
     const matches = allConstellations.filter(c => 
-      c.toLowerCase().startsWith(inputLower) && !gameState.usedConstellations.has(c)
+      c.toLowerCase().startsWith(inputLower)
     )
     
     if (matches.length === 1 && matches[0].toLowerCase() !== inputLower) {
@@ -388,11 +388,17 @@ function GameContent() {
   useEffect(() => {
     if (gameState?.gameStatus !== "playing" && gameState?.gameStatus) {
       const timeout = setTimeout(() => {
+        const path = [
+          gameState.startConstellation,
+          ...gameState.moves.map((move) => move.constellation),
+        ]
+
         const params = new URLSearchParams({
           result: gameState.gameStatus,
           reason: gameState.endReason,
           start: gameState.startConstellation,
           target: gameState.targetConstellation,
+          path: JSON.stringify(path),
         })
         router.push(`/result?${params.toString()}`)
       }, 1500)
@@ -448,21 +454,21 @@ function GameContent() {
       {/* Header with start and target - at edges and bigger */}
       <div className="w-full max-w-4xl flex justify-between items-start mb-8 px-2 relative z-10">
         <div className="text-left">
-          <p className="text-base uppercase tracking-widest text-muted-foreground mb-1">Старт</p>
-          <p className="text-4xl md:text-5xl font-display text-foreground tracking-wide">{gameState.startConstellation}</p>
+          <p className="text-4xl tracking-[0.08em] text-white mb-1">Старт</p>
+          <p className="text-4xl md:text-5xl text-zinc-300 tracking-[0.08em]">{gameState.startConstellation}</p>
         </div>
         <div className="text-right">
-          <p className="text-base uppercase tracking-widest text-muted-foreground mb-1">Финиш</p>
-          <p className="text-4xl md:text-5xl font-display text-foreground tracking-wide">{gameState.targetConstellation}</p>
+          <p className="text-4xl tracking-[0.08em] text-white mb-1">Финиш</p>
+          <p className="text-4xl md:text-5xl text-zinc-300 tracking-[0.08em]">{gameState.targetConstellation}</p>
         </div>
       </div>
 
       {/* Current constellation */}
       <div className="text-center mb-6 relative z-10">
-        <p className="text-base uppercase tracking-widest text-muted-foreground mb-2">
+        <p className="text-4xl tracking-[0.08em] text-white mb-3">
           Текущее созвездие
         </p>
-        <p className="text-5xl md:text-6xl font-display text-foreground tracking-wide drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
+        <p className="text-5xl md:text-6xl text-foreground tracking-[0.12em] drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
           {gameState.currentConstellation}
         </p>
       </div>
@@ -471,12 +477,12 @@ function GameContent() {
       <div className="w-24 h-px bg-foreground/20 mb-6 relative z-10" />
 
       {/* Turn indicator */}
-      <p className="text-2xl text-muted-foreground mb-3 relative z-10 tracking-[0.15em]">
+      <p className="text-4xl text-zinc-300 mb-4 relative z-10 tracking-[0.1em]">
         {gameState.isPlayerTurn ? "Ваш ход" : "Ход ИИ..."}
       </p>
 
       {/* Input with autocomplete */}
-      <form onSubmit={handleSubmit} className="w-full max-w-sm mb-4 relative z-10">
+      <form onSubmit={handleSubmit} className="w-full max-w-xl mb-4 relative z-10">
         <div className="relative">
           <input
             ref={inputRef}
@@ -486,18 +492,19 @@ function GameContent() {
             onKeyDown={handleKeyDown}
             placeholder="Введите созвездие..."
             disabled={!gameState.isPlayerTurn || gameState.gameStatus !== "playing"}
-            className="w-full bg-transparent border-b-2 border-foreground/30 text-foreground text-center text-2xl py-2 font-bold tracking-[0.1em] placeholder:text-muted-foreground focus:outline-none focus:border-foreground transition-colors disabled:opacity-50"
+            className="relative z-10 w-full bg-transparent border-b-2 border-foreground/30 text-foreground text-left text-4xl py-2 tracking-[0.08em] placeholder:text-zinc-600 focus:outline-none focus:border-foreground transition-colors disabled:opacity-50"
           />
-          {autocomplete && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <span className="text-2xl font-bold text-muted-foreground/50 tracking-[0.1em]">
-                {autocomplete}
+          {autocomplete && autocomplete.toLowerCase() !== input.toLowerCase() && (
+            <div className="absolute inset-0 flex items-center pointer-events-none">
+              <span className="text-4xl text-zinc-500 tracking-[0.08em]">
+                <span className="invisible">{input}</span>
+                <span>{autocomplete.slice(input.length)}</span>
               </span>
             </div>
           )}
         </div>
         {autocomplete && (
-          <p className="text-lg text-muted-foreground mt-1 text-center tracking-[0.1em]">
+          <p className="text-2xl text-zinc-500 mt-2 text-left tracking-[0.08em]">
             Tab для автодополнения
           </p>
         )}
