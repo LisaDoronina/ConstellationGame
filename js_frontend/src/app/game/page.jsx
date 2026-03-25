@@ -409,6 +409,7 @@ function GameContent() {
   }
 
   const validMoves = getValidMoves(gameState.currentConstellation, gameState.usedConstellations)
+  const neighborMoves = constellations[gameState.currentConstellation] || []
   const showNeighbors = gameState.difficulty === "easy"
   const showSelectBackground = inputMethod === "select"
 
@@ -520,16 +521,20 @@ function GameContent() {
         <div className="mb-8 text-center relative z-10">
           <p className="text-lg text-muted-foreground mb-2 tracking-[0.15em]">Доступные соседи</p>
           <div className="flex flex-wrap justify-center gap-2">
-            {validMoves.map((move) => (
+            {neighborMoves.map((move) => (
               <button
                 key={move}
                 onClick={() => setInput(move)}
-                className="text-xl text-foreground/70 hover:text-foreground transition-colors tracking-[0.1em]"
+                className={`text-xl transition-colors tracking-[0.1em] ${
+                  gameState.usedConstellations.has(move)
+                    ? "text-amber-500/70 hover:text-amber-500"
+                    : "text-foreground/70 hover:text-foreground"
+                }`}
               >
                 {move}
               </button>
             ))}
-            {validMoves.length === 0 && (
+            {neighborMoves.length === 0 && (
               <p className="text-lg text-muted-foreground tracking-[0.1em]">Нет доступных ходов</p>
             )}
           </div>
