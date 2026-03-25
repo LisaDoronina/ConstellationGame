@@ -4,6 +4,14 @@
 
 using json = nlohmann::json;
 
+static std::string NormalizeMove(const std::string& input) {
+  std::string result = input;
+
+  std::transform(result.begin(), result.end(), result.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+  return result;
+}
+
 GameEngine::GameEngine(ConstellationGraph graph) : graph_(graph) {}
 
 void GameEngine::InitGame(int lives) {
@@ -31,7 +39,11 @@ void GameEngine::InitGame(int lives) {
 void GameEngine::ProcessPlayerMove(const std::string& input) {
   if (!state_.player_turn || state_.game_over) return;
 
-  int move = graph_.GetIdFromFull(input);
+  std::string normalized = NormalizeMove(input);
+
+  if (!normalized.empty()) normalized[0] = std::toupper(normalized[0]);
+
+  int move = graph_.GetIdFromFull(normalized);
 
   if (move == -1) return;
 
