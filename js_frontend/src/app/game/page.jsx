@@ -431,7 +431,7 @@ function GameContent() {
 
   return (
     <main
-      className={`min-h-screen bg-background flex flex-col items-center justify-center px-4 py-8 transition-colors duration-300 relative ${
+      className={`relative isolate min-h-screen bg-background flex flex-col items-center justify-center px-4 py-8 transition-colors duration-300 ${
         feedback === "success"
           ? "bg-green-950/30"
           : feedback === "error"
@@ -439,6 +439,13 @@ function GameContent() {
           : ""
       }`}
     >
+    <img
+            src="/background_v3.jpg"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none fixed inset-0 -z-20 h-full w-full object-cover"
+          />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
       {/* Constellation background for select mode */}
       {showSelectBackground && (
         <ConstellationBackground

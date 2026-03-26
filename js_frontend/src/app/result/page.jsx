@@ -29,7 +29,14 @@ function ResultContent() {
     path.length > 0 ? `/api/path-image?path=${encodeURIComponent(JSON.stringify(path))}` : null
 
   return (
-    <main className="min-h-screen bg-background px-8 py-10 md:px-14 md:py-12">
+    <main className="relative isolate min-h-screen bg-background px-8 py-10 md:px-14 md:py-12">
+        <img
+                src="/background_v3.jpg"
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none fixed inset-0 -z-20 h-full w-full object-cover"
+         />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-6xl flex-col">
         <div className="relative mt-4 flex items-end justify-between gap-8">
           <div className="text-4xl text-zinc-300 md:text-5xl">*User*</div>

@@ -12,7 +12,14 @@ function RulesContent() {
   const returnTo = searchParams.get("returnTo")
 
   return (
-    <main className="min-h-screen bg-background px-8 py-8 md:px-14 md:py-10">
+    <main className="relative isolate min-h-screen bg-background px-8 py-8 md:px-14 md:py-10">
+      <img
+        src="/background_v3.jpg"
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-20 h-full w-full object-cover"
+      />
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col">
         <div className="mt-2 flex items-end justify-between gap-8">
           <div className="translate-y-1 text-4xl text-zinc-300 md:text-5xl">*User*</div>
