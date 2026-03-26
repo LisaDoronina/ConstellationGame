@@ -60,8 +60,8 @@ export default function HomePage() {
   }
 
   const modeClass = (isSelected) =>
-    `origin-left whitespace-nowrap uppercase tracking-[0.14em] text-white transition-all duration-200 hover:text-zinc-100 ${
-      isSelected ? "text-5xl font-normal" : "text-4xl font-normal hover:scale-105"
+    `origin-left whitespace-nowrap uppercase leading-none tracking-[0.14em] text-white transition-colors duration-200 hover:text-zinc-100 ${
+      isSelected ? "text-5xl font-normal" : "text-4xl font-normal"
     }`
 
   const optionClass = (isSelected) =>
@@ -94,7 +94,7 @@ export default function HomePage() {
 
         <div className="grid py-10 flex-1 gap-14 md:mt-24 md:grid-cols-[0.92fr_1.08fr] md:gap-12">
           <section className="pr-0">
-            <h2 className="mb-5 whitespace-nowrap text-5xl font-bold uppercase tracking-[0.18em] text-foreground">
+            <h2 className="mb-5 whitespace-nowrap text-5xl font-bold uppercase tracking-[0.1em] text-foreground">
               Режим игры
             </h2>
             <div className="mb-8 h-px w-full bg-foreground/20" />
@@ -107,10 +107,10 @@ export default function HomePage() {
                   <button
                     key={mode.id}
                     onClick={() => setSelectedMode(mode.id)}
-                    className="grid grid-cols-[auto_1fr] items-baseline gap-3 text-left"
+                    className="flex flex-col items-start gap-2 text-left"
                   >
                     <span className={modeClass(isSelected)}>{mode.label}</span>
-                    <span className="whitespace-nowrap text-3xl ml-6 tracking-[0.08em] text-zinc-500">
+                    <span className="ml-6 whitespace-nowrap text-3xl leading-none tracking-[0.08em] text-zinc-500">
                       {mode.description}
                     </span>
                   </button>
@@ -127,8 +127,8 @@ export default function HomePage() {
 
             <div className="flex flex-col gap-10">
               <div className="grid grid-cols-[auto_1fr] items-baseline gap-3">
-                <p className="whitespace-nowrap text-5xl tracking-[0.08em] text-white">Жизни</p>
-                <div className="flex flex-wrap gap-10 ml-10">
+                <p className="whitespace-nowrap text-5xl leading-none tracking-[0.08em] text-white">Жизни</p>
+                <div className="ml-6 flex flex-wrap gap-8">
                   {[1, 3, 5].map((num) => (
                     <button
                       key={num}
@@ -142,8 +142,8 @@ export default function HomePage() {
               </div>
 
               <div className="grid grid-cols-[auto_1fr] items-baseline gap-3">
-                <p className="whitespace-nowrap text-5xl tracking-[0.08em] text-white">Способ ввода</p>
-                <div className="flex flex-wrap gap-8 ml-10">
+                <p className="whitespace-nowrap text-5xl leading-none tracking-[0.08em] text-white">Способ ввода</p>
+                <div className="ml-6 flex flex-wrap gap-8">
                   {inputMethodChoices.map((method) => (
                     <button
                       key={method.id}
@@ -157,8 +157,8 @@ export default function HomePage() {
               </div>
 
               <div className="grid grid-cols-[auto_1fr] items-baseline gap-3">
-                <p className="whitespace-nowrap text-5xl tracking-[0.08em] text-white">Подсказки</p>
-                <div className="flex flex-wrap gap-8 ml-10">
+                <p className="whitespace-nowrap text-5xl leading-none tracking-[0.08em] text-white">Подсказки</p>
+                <div className="ml-6 flex flex-wrap gap-8">
                   {difficultyChoices.map((diff) => (
                     <button
                       key={diff.id}
@@ -184,3 +184,7 @@ export default function HomePage() {
     </main>
   )
 }
+
+
+
+
