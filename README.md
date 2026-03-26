@@ -14,4 +14,7 @@
 
 - to run the server ```python python_ml/src/main.py``` or ```python -m python_ml.src.main```
 
-- to run front ```npm install``` then ```npm run dev```
+- to run front:
+```cd js_frontend\src```
+```npm install```
+```npm run dev```
