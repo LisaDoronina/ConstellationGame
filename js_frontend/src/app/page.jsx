@@ -20,7 +20,7 @@ const inputMethodChoices = [
 ]
 
 const actionButtonClass =
-  "pointer-events-auto z-50 whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-6xl"
+  "pointer-events-auto z-50 whitespace-nowrap text-right text-4xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-6xl"
 
 const rulesButtonClass =
   "absolute top-0 z-50 text-right right-0 text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"

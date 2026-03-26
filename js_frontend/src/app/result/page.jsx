@@ -11,7 +11,7 @@ const topLeftUserClass =
   "fixed top-7 left-8 z-50 text-left text-4xl text-zinc-300 md:top-12 md:left-14 md:text-5xl"
 
 const actionButtonClass =
-  "pointer-events-auto whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-110 hover:text-white md:text-6xl"
+  "pointer-events-auto whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-6xl"
 
 function ResultContent() {
   const searchParams = useSearchParams()
@@ -32,7 +32,7 @@ function ResultContent() {
     path.length > 0 ? `/api/path-image?path=${encodeURIComponent(JSON.stringify(path))}` : null
 
   return (
-    <main className="relative isolate min-h-screen bg-background py-7 md:py-12">
+    <main className="relative isolate min-h-screen w-full bg-background py-7 md:py-12  overflow-x-hidden">
         <img
                 src="/background_v3.jpg"
                 alt=""
@@ -81,15 +81,16 @@ function ResultContent() {
           </div>
         </div>
 
-        <div className="mt-10 flex w-full max-w-5xl justify-end self-center pb-10">
-          <Link
-            href="/"
-            className={actionButtonClass}
-          >
-            На главную
-          </Link>
-        </div>
+
       </div>
+          <div className="absolute bottom-7 right-20 flex justify-end center-right">
+            <Link
+              href="/"
+              className={actionButtonClass}
+            >
+              На главную
+            </Link>
+          </div>
     </main>
   )
 }
