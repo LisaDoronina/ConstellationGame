@@ -5,7 +5,10 @@ import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
 
 const rulesButtonClass =
-  "fixed top-8 right-14 z-50 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white md:text-5xl"
+  "fixed top-7 right-8 z-50 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white md:top-12 md:right-14 md:text-5xl"
+
+const topLeftUserClass =
+  "fixed top-7 left-8 z-50 text-left text-4xl text-zinc-300 md:top-12 md:left-14 md:text-5xl"
 
 const actionButtonClass =
   "pointer-events-auto whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-110 hover:text-white md:text-6xl"
@@ -29,7 +32,7 @@ function ResultContent() {
     path.length > 0 ? `/api/path-image?path=${encodeURIComponent(JSON.stringify(path))}` : null
 
   return (
-    <main className="relative isolate min-h-screen bg-background px-8 py-10 md:px-14 md:py-12">
+    <main className="relative isolate min-h-screen bg-background px-8 py-7 md:px-14 md:py-12">
         <img
                 src="/background_v3.jpg"
                 alt=""
@@ -39,7 +42,7 @@ function ResultContent() {
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-6xl flex-col">
         <div className="relative mt-4 flex items-end justify-between gap-8">
-          <div className="text-4xl text-zinc-300 md:text-5xl">*User*</div>
+          <div className={topLeftUserClass}>*User*</div>
 
           <h1 className="pointer-events-none absolute left-1/2 -translate-x-1/2 translate-y-1 whitespace-nowrap text-center text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
             {result === "won" ? "Победа" : "Поражение"}
@@ -53,12 +56,12 @@ function ResultContent() {
         <div className="mt-14 flex justify-between gap-8">
           <div className="text-left">
             <p className="text-5xl font-bold tracking-[0.08em] text-white">Старт</p>
-            <p className="text-5xl tracking-[0.08em] text-zinc-300">{start}</p>
+            <p className="ml-12 text-5xl tracking-[0.08em] text-zinc-300">{start}</p>
           </div>
 
           <div className="text-right">
             <p className="text-5xl font-bold tracking-[0.08em] text-white">Финиш</p>
-            <p className="text-5xl tracking-[0.08em] text-zinc-300">{target}</p>
+            <p className="ml-12 text-5xl tracking-[0.08em] text-zinc-300">{target}</p>
           </div>
         </div>
 
@@ -106,3 +109,5 @@ export default function ResultPage() {
     </Suspense>
   )
 }
+
+

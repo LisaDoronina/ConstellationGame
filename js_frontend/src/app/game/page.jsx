@@ -8,10 +8,13 @@ import { allConstellations, constellations } from "./constellations-data"
 const allConstellationNames = allConstellations
 
 const topRightButtonClass =
-  "fixed top-8 right-14 z-50 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white md:text-5xl"
+  "fixed top-7 right-8 z-50 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white md:top-12 md:right-14 md:text-5xl"
+
+const topLeftUserClass =
+  "fixed top-7 left-8 z-50 text-left text-4xl text-zinc-300 md:top-12 md:left-14 md:text-5xl"
 
 const bottomRightActionClass =
-  "fixed bottom-10 right-14 z-50 whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-110 hover:text-white md:text-6xl"
+  "fixed bottom-7 right-8 z-50 whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:bottom-12 md:right-14 md:text-6xl"
 
 function getRandomConstellation() {
   return allConstellationNames[Math.floor(Math.random() * allConstellationNames.length)]
@@ -431,7 +434,7 @@ function GameContent() {
 
   return (
     <main
-      className={`relative isolate min-h-screen bg-background flex flex-col items-center justify-center px-4 py-8 transition-colors duration-300 ${
+      className={`relative isolate min-h-screen bg-background flex flex-col items-center justify-center px-8 py-7 transition-colors duration-300 md:px-14 md:py-12 ${
         feedback === "success"
           ? "bg-green-950/30"
           : feedback === "error"
@@ -464,21 +467,23 @@ function GameContent() {
         Правила
       </Link>
 
+      <div className={topLeftUserClass}>*User*</div>
+
       {/* Header with start and target - at edges and bigger */}
-      <div className="mt-14 flex w-full max-w-6xl justify-between gap-8 relative z-10">
-        <div className="text-left">
+      <div className="relative z-10 mt-20 flex w-full max-w-6xl justify-between gap-8 md:mt-24">
+        <div className="flex flex-col gap-1 text-left">
           <p className="text-5xl font-bold tracking-[0.08em] text-white">Старт</p>
           <p className="text-5xl tracking-[0.08em] text-zinc-300">{gameState.startConstellation}</p>
         </div>
-        <div className="text-right">
+        <div className="flex flex-col gap-1 text-right">
           <p className="text-5xl font-bold tracking-[0.08em] text-white">Финиш</p>
           <p className="text-5xl tracking-[0.08em] text-zinc-300">{gameState.targetConstellation}</p>
         </div>
       </div>
 
       {/* Current constellation */}
-      <div className="text-center mb-6 relative z-10">
-        <p className="text-5xl tracking-[0.08em] text-white mb-3 md:text-6xl">
+      <div className="relative z-10 mb-6 flex flex-col gap-1 text-center">
+        <p className="text-5xl tracking-[0.08em] text-white md:text-6xl text-bold ">
           Текущее созвездие
         </p>
         <p className="text-5xl md:text-6xl font-bold text-foreground tracking-[0.12em] drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
@@ -571,7 +576,7 @@ function GameContent() {
       )}
 
       {/* Lives - bottom left with label, bigger and with padding */}
-      <div className="fixed bottom-8 left-8 flex flex-col items-start z-50">
+      <div className="fixed bottom-7 left-8 z-50 flex flex-col items-start md:bottom-12 md:left-14">
         <p className="text-base text-muted-foreground/60 mb-1 uppercase tracking-[0.15em]">
           Жизни
         </p>
@@ -613,3 +618,4 @@ export default function GamePage() {
     </Suspense>
   )
 }
+
