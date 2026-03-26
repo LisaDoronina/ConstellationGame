@@ -29,7 +29,6 @@ public class AuthController {
       Map<String, Object> response = new HashMap<>();
       response.put("message", "User registered successfully");
       response.put("username", user.getUsername());
-      response.put("email", user.getEmail());
       response.put("id", user.getId());
 
       return ResponseEntity.ok(response);
@@ -74,7 +73,6 @@ public class AuthController {
       Map<String, Object> response = new HashMap<>();
       response.put("id", user.getId());
       response.put("username", user.getUsername());
-      response.put("email", user.getEmail());
       response.put("gameIds", user.getGameIds());
 
       return ResponseEntity.ok(response);

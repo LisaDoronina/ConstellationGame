@@ -32,16 +32,10 @@ public class AuthenticationService {
       throw new RuntimeException("Username is already taken");
     }
 
-    if (request.getEmail() != null && !request.getEmail().isEmpty() &&
-            userRepository.existsByEmail(request.getEmail())) {
-      throw new RuntimeException("Email is already registered");
-    }
-
     String passwordHash = passwordService.hashPassword(request.getPassword());
 
     User user = new User();
     user.setUsername(request.getUsername());
-    user.setEmail(request.getEmail());
     user.setPasswordHash(passwordHash);
     user.setGameIds(new ArrayList<>());
 
@@ -52,10 +46,10 @@ public class AuthenticationService {
   }
 
   public AuthResponse login(LoginRequest request) {
-    Optional<User> userOptional = userRepository.getByUsernameOrEmail(request.getUsernameOrEmail());
+    Optional<User> userOptional = userRepository.getByUsername(request.getUsername());
 
     if (userOptional.isEmpty()) {
-      System.out.println("[AuthenticationService] Login failed: User not found - " + request.getUsernameOrEmail());
+      System.out.println("[AuthenticationService] Login failed: User not found - " + request.getUsername());
       throw new RuntimeException("Invalid username/email or password");
     }
 
@@ -76,7 +70,6 @@ public class AuthenticationService {
     response.setType("Bearer");
     response.setId(user.getId());
     response.setUsername(user.getUsername());
-    response.setEmail(user.getEmail());
     response.setGameIds(user.getGameIds());
 
     return response;

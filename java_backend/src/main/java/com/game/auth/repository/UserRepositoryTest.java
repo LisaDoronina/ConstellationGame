@@ -1,6 +1,8 @@
 package com.game.auth.repository;
 
 import com.game.auth.entity.User;
+import com.game.auth.service.PasswordService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class UserRepositoryTest {
 
@@ -8,16 +10,17 @@ public class UserRepositoryTest {
     System.out.println("=== Testing UserRepository ===\n");
 
     UserRepository userRepository = new UserRepository();
+    PasswordService passwordService = new PasswordService(new BCryptPasswordEncoder());
 
     System.out.println("Test 1: Save user");
     User user = new User();
     user.setUsername("john_doe");
-    user.setEmail("john@example.com");
-    user.setPasswordHash("hashedPassword123");
+    user.setPasswordHash("123456Aa!");
 
     User savedUser = userRepository.save(user);
     System.out.println("  Saved user ID: " + savedUser.getId());
     System.out.println("  Username: " + savedUser.getUsername());
+    System.out.println(" Hash: " + user.getPasswordHash());
     System.out.println("  Result: PASSED\n");
 
     System.out.println("Test 2: Find by ID");
@@ -38,16 +41,7 @@ public class UserRepositoryTest {
       System.out.println("  Result: FAILED - User not found\n");
     }
 
-    System.out.println("Test 4: Find by email");
-    java.util.Optional<User> foundByEmail = userRepository.getByEmail("john@example.com");
-    if (foundByEmail.isPresent()) {
-      System.out.println("  Found user: " + foundByEmail.get().getEmail());
-      System.out.println("  Result: PASSED\n");
-    } else {
-      System.out.println("  Result: FAILED - User not found\n");
-    }
-
-    System.out.println("Test 5: Check if username exists");
+    System.out.println("Test 4: Check if username exists");
     boolean exists = userRepository.existsByUsername("john_doe");
     if (exists) {
       System.out.println("  Username exists: true");
@@ -56,27 +50,18 @@ public class UserRepositoryTest {
       System.out.println("  Result: FAILED - Username should exist\n");
     }
 
-    System.out.println("Test 6: Check if email exists");
-    boolean emailExists = userRepository.existsByEmail("john@example.com");
-    if (emailExists) {
-      System.out.println("  Email exists: true");
-      System.out.println("  Result: PASSED\n");
-    } else {
-      System.out.println("  Result: FAILED - Email should exist\n");
-    }
-
-    System.out.println("Test 7: Save second user");
+    System.out.println("Test 5: Save second user");
     User user2 = new User();
     user2.setUsername("jane_doe");
-    user2.setEmail("jane@example.com");
-    user2.setPasswordHash("hash456");
+    user2.setPasswordHash("hash456!");
 
     User savedUser2 = userRepository.save(user2);
     System.out.println("  Saved user ID: " + savedUser2.getId());
     System.out.println("  Username: " + savedUser2.getUsername());
+    System.out.println(" Hash: " + savedUser2.getPasswordHash());
     System.out.println("  Result: PASSED\n");
 
-    System.out.println("Test 8: Get all users");
+    System.out.println("Test 6: Get all users");
     java.util.List<User> allUsers = userRepository.getAllUsers();
     System.out.println("  Total users: " + allUsers.size());
     for (User u : allUsers) {
@@ -88,7 +73,7 @@ public class UserRepositoryTest {
       System.out.println("  Result: FAILED - Expected 2 users, got " + allUsers.size() + "\n");
     }
 
-    System.out.println("Test 9: Add game to user");
+    System.out.println("Test 7: Add game to user");
     savedUser.addGame(100L);
     savedUser.addGame(200L);
     userRepository.save(savedUser);
@@ -101,7 +86,7 @@ public class UserRepositoryTest {
       System.out.println("  Result: FAILED\n");
     }
 
-    System.out.println("Test 10: Remove game from user");
+    System.out.println("Test 8: Remove game from user");
     savedUser.removeGame(100L);
     userRepository.save(savedUser);
 
@@ -113,7 +98,7 @@ public class UserRepositoryTest {
       System.out.println("  Result: FAILED\n");
     }
 
-    System.out.println("Test 11: Delete user");
+    System.out.println("Test 9: Delete user");
     userRepository.deleteById(2L);
     java.util.Optional<User> deletedUser = userRepository.findById(2L);
     if (!deletedUser.isPresent()) {
@@ -123,7 +108,7 @@ public class UserRepositoryTest {
       System.out.println("  Result: FAILED - User still exists\n");
     }
 
-    System.out.println("Test 12: Users after delete");
+    System.out.println("Test 10: Users after delete");
     java.util.List<User> remainingUsers = userRepository.getAllUsers();
     System.out.println("  Remaining users: " + remainingUsers.size());
     for (User u : remainingUsers) {

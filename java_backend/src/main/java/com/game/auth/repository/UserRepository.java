@@ -1,6 +1,8 @@
 package com.game.auth.repository;
 
 import com.game.auth.entity.User;
+import com.game.auth.service.PasswordService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
@@ -12,8 +14,8 @@ public class UserRepository {
 
   private final Map<Long, User> userStore = new ConcurrentHashMap<>();
   private final Map<String, User> usernameIndex = new ConcurrentHashMap<>();
-  private final Map<String, User> emailIndex = new ConcurrentHashMap<>();
   private final AtomicLong idGenerator = new AtomicLong(1);
+  private final PasswordService passwordService = new PasswordService(new BCryptPasswordEncoder());
 
   public User save(User user) {
     if (user.getId() == null) {
@@ -22,10 +24,6 @@ public class UserRepository {
 
     userStore.put(user.getId(), user);
     usernameIndex.put(user.getUsername(), user);
-
-    if (user.getEmail() != null && !user.getEmail().isEmpty()) {
-      emailIndex.put(user.getEmail(), user);
-    }
 
     System.out.println("[UserRepository] Saved user: " + user.getUsername() + " with ID: " + user.getId());
     System.out.println("[UserRepository] Total users: " + userStore.size());
@@ -53,37 +51,6 @@ public class UserRepository {
     return Optional.ofNullable(user);
   }
 
-  public Optional<User> getByEmail(String email) {
-    User user = emailIndex.get(email);
-    if (user != null) {
-      System.out.println("[UserRepository] Found user by email: " + email);
-    } else {
-      System.out.println("[UserRepository] No user found with email: " + email);
-    }
-    return Optional.ofNullable(user);
-  }
-
-  public Optional<User> getByUsernameOrEmail(String usernameOrEmail) {
-    System.out.println("[UserRepository] Looking for: " + usernameOrEmail);
-
-    if (usernameOrEmail != null && !usernameOrEmail.isEmpty()) {
-      Optional<User> byUsername = getByUsername(usernameOrEmail);
-      if (byUsername.isPresent()) {
-        return byUsername;
-      }
-
-      if (usernameOrEmail.contains("@")) {
-        Optional<User> byEmail = getByEmail(usernameOrEmail);
-        if (byEmail.isPresent()) {
-          return byEmail;
-        }
-      }
-    }
-
-    System.out.println("[UserRepository] No user found for: " + usernameOrEmail);
-    return Optional.empty();
-  }
-
   public boolean existsByUsername(String username) {
     if (username == null || username.isEmpty()) {
       return false;
@@ -93,14 +60,6 @@ public class UserRepository {
     return exists;
   }
 
-  public boolean existsByEmail(String email) {
-    if (email == null || email.isEmpty()) {
-      return false;
-    }
-    boolean exists = emailIndex.containsKey(email);
-    System.out.println("[UserRepository] Email exists check for '" + email + "': " + exists);
-    return exists;
-  }
 
   public List<User> getAllUsers() {
     List<User> users = new ArrayList<>(userStore.values());
@@ -112,9 +71,7 @@ public class UserRepository {
     User user = userStore.remove(id);
     if (user != null) {
       usernameIndex.remove(user.getUsername());
-      if (user.getEmail() != null) {
-        emailIndex.remove(user.getEmail());
-      }
+
       System.out.println("[UserRepository] Deleted user: " + user.getUsername());
     }
   }
