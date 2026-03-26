@@ -23,10 +23,10 @@ const actionButtonClass =
   "pointer-events-auto z-50 whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-6xl"
 
 const rulesButtonClass =
-  "absolute top-8 z-50 text-right right-0 text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
+  "absolute top-0 z-50 text-right right-0 text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
 const userButtonClass =
-  "absolute top-8 z-50 text-left left-0 text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
+  "absolute top-0 z-50 text-left left-0 text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
 export default function HomePage() {
   const [selectedMode, setSelectedMode] = useState("normal")
@@ -60,8 +60,8 @@ export default function HomePage() {
   }
 
   const modeClass = (isSelected) =>
-    `origin-left whitespace-nowrap uppercase tracking-[0.14em] text-white transition-all duration-200 hover:scale-110 hover:text-zinc-100 ${
-      isSelected ? "scale-110 text-5xl font-bold" : "text-4xl font-normal"
+    `origin-left whitespace-nowrap uppercase tracking-[0.14em] text-white transition-all duration-200 hover:text-zinc-100 ${
+      isSelected ? "text-5xl font-normal" : "text-4xl font-normal hover:scale-105"
     }`
 
   const optionClass = (isSelected) =>
@@ -97,7 +97,7 @@ export default function HomePage() {
             <h2 className="mb-5 whitespace-nowrap text-5xl font-bold uppercase tracking-[0.18em] text-foreground">
               Режим игры
             </h2>
-            <div className="mb-10 h-px w-full bg-foreground/20" />
+            <div className="mb-8 h-px w-full bg-foreground/20" />
 
             <div className="flex flex-col gap-10">
               {presetModes.map((mode) => {
@@ -110,7 +110,7 @@ export default function HomePage() {
                     className="grid grid-cols-[auto_1fr] items-baseline gap-3 text-left"
                   >
                     <span className={modeClass(isSelected)}>{mode.label}</span>
-                    <span className="whitespace-nowrap text-4xl tracking-[0.08em] text-zinc-500">
+                    <span className="whitespace-nowrap text-3xl ml-6 tracking-[0.08em] text-zinc-500">
                       {mode.description}
                     </span>
                   </button>
@@ -125,10 +125,10 @@ export default function HomePage() {
             </div>
             <div className="mb-8 h-px w-full bg-foreground/20" />
 
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-10">
               <div className="grid grid-cols-[auto_1fr] items-baseline gap-3">
                 <p className="whitespace-nowrap text-5xl tracking-[0.08em] text-white">Жизни</p>
-                <div className="flex flex-wrap gap-8">
+                <div className="flex flex-wrap gap-10 ml-10">
                   {[1, 3, 5].map((num) => (
                     <button
                       key={num}
@@ -143,7 +143,7 @@ export default function HomePage() {
 
               <div className="grid grid-cols-[auto_1fr] items-baseline gap-3">
                 <p className="whitespace-nowrap text-5xl tracking-[0.08em] text-white">Способ ввода</p>
-                <div className="flex flex-wrap gap-8">
+                <div className="flex flex-wrap gap-8 ml-10">
                   {inputMethodChoices.map((method) => (
                     <button
                       key={method.id}
@@ -158,7 +158,7 @@ export default function HomePage() {
 
               <div className="grid grid-cols-[auto_1fr] items-baseline gap-3">
                 <p className="whitespace-nowrap text-5xl tracking-[0.08em] text-white">Подсказки</p>
-                <div className="flex flex-wrap gap-8">
+                <div className="flex flex-wrap gap-8 ml-10">
                   {difficultyChoices.map((diff) => (
                     <button
                       key={diff.id}
