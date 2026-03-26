@@ -65,8 +65,8 @@ export default function HomePage() {
     }`
 
   const optionClass = (isSelected) =>
-    `origin-left whitespace-nowrap uppercase tracking-[0.08em] text-zinc-400 transition-all duration-200 hover:scale-110 hover:text-zinc-200 ${
-      isSelected ? "text-zinc-300 underline decoration-2 underline-offset-8" : ""
+    `origin-left whitespace-nowrap uppercase tracking-[0.08em] transition-all duration-200 hover:scale-110 hover:text-zinc-200 ${
+      isSelected ? "text-white underline decoration-2 underline-offset-8" : "text-zinc-500"
     }`
 
   return (
@@ -128,7 +128,7 @@ export default function HomePage() {
             <div className="flex flex-col gap-10">
               <div className="grid grid-cols-[auto_1fr] items-baseline gap-3">
                 <p className="whitespace-nowrap text-5xl leading-none tracking-[0.08em] text-white">Жизни</p>
-                <div className="ml-6 flex flex-wrap gap-8">
+                <div className="flex flex-wrap justify-center gap-10">
                   {[1, 3, 5].map((num) => (
                     <button
                       key={num}
@@ -143,7 +143,7 @@ export default function HomePage() {
 
               <div className="grid grid-cols-[auto_1fr] items-baseline gap-3">
                 <p className="whitespace-nowrap text-5xl leading-none tracking-[0.08em] text-white">Способ ввода</p>
-                <div className="ml-6 flex flex-wrap gap-8">
+                <div className="flex flex-wrap justify-center gap-10">
                   {inputMethodChoices.map((method) => (
                     <button
                       key={method.id}
@@ -158,7 +158,7 @@ export default function HomePage() {
 
               <div className="grid grid-cols-[auto_1fr] items-baseline gap-3">
                 <p className="whitespace-nowrap text-5xl leading-none tracking-[0.08em] text-white">Подсказки</p>
-                <div className="ml-6 flex flex-wrap gap-8">
+                <div className="flex flex-wrap justify-center gap-10">
                   {difficultyChoices.map((diff) => (
                     <button
                       key={diff.id}
@@ -184,6 +184,7 @@ export default function HomePage() {
     </main>
   )
 }
+
 
 
 
