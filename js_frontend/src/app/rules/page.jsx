@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
@@ -13,6 +14,17 @@ const topLeftUserClass =
 function RulesContent() {
   const searchParams = useSearchParams()
   const returnTo = searchParams.get("returnTo")
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [username, setUsername] = useState("")
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true'
+    const storedUsername = localStorage.getItem('username')
+    setIsLoggedIn(loggedIn)
+    if (storedUsername) {
+      setUsername(storedUsername)
+    }
+  }, [])
 
   return (
     <main className="relative isolate min-h-screen bg-background px-8 py-7 md:px-14 md:py-12">
@@ -25,7 +37,9 @@ function RulesContent() {
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col">
         <div className="mt-2 flex items-end justify-between gap-8">
-          <div className={topLeftUserClass}>*User*</div>
+          <Link href={isLoggedIn ? "/profile" : "/login"} className={`${topLeftUserClass} uppercase tracking-[0.18em] transition-all duration-200 hover:text-white hover:scale-105`}>
+            {isLoggedIn ? username : "Вход"}
+          </Link>
 
           <h1 className="pointer-events-none absolute left-1/2 -translate-x-1/2 translate-y-1 whitespace-nowrap text-center text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
             Правила</h1>

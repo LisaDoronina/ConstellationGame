@@ -151,6 +151,18 @@ function GameContent() {
   const [gameState, setGameState] = useState(null)
   const [autocomplete, setAutocomplete] = useState(null)
   const [checkResult, setCheckResult] = useState(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [username, setUsername] = useState("")
+
+  // Проверка авторизации
+  useEffect(() => {
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true'
+    const storedUsername = localStorage.getItem('username')
+    setIsLoggedIn(loggedIn)
+    if (storedUsername) {
+      setUsername(storedUsername)
+    }
+  }, [])
 
   // Initialize game
   useEffect(() => {
@@ -467,7 +479,9 @@ function GameContent() {
         Правила
       </Link>
 
-      <div className={topLeftUserClass}>*User*</div>
+      <Link href={isLoggedIn ? "/profile" : "/login"} className={`${topLeftUserClass} uppercase tracking-[0.18em] transition-all duration-200 hover:text-white hover:scale-105`}>
+        {isLoggedIn ? username : "Вход"}
+      </Link>
 
       {/* Header with start and target - at edges and bigger */}
       <div className="relative z-10 mt-20 flex w-full max-w-6xl justify-between gap-8 md:mt-24">

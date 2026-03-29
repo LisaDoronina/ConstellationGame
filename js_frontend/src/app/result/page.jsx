@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
@@ -15,6 +16,18 @@ const actionButtonClass =
 
 function ResultContent() {
   const searchParams = useSearchParams()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [username, setUsername] = useState("")
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true'
+    const storedUsername = localStorage.getItem('username')
+    setIsLoggedIn(loggedIn)
+    if (storedUsername) {
+      setUsername(storedUsername)
+    }
+  }, [])
+
   const result = searchParams.get("result") || "lost"
   const reason = searchParams.get("reason") || "Неизвестная причина"
   const start = searchParams.get("start") || "—"
@@ -45,7 +58,9 @@ function ResultContent() {
             <h1 className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 text-center whitespace-nowrap text-6xl font-bold uppercase tracking-[0.2em] text-foreground">
               {result === "won" ? "Победа" : "Поражение"}
             </h1>
-          <div className={topLeftUserClass}>*User*</div>
+          <Link href={isLoggedIn ? "/profile" : "/login"} className={`${topLeftUserClass} uppercase tracking-[0.18em] transition-all duration-200 hover:text-white hover:scale-105`}>
+            {isLoggedIn ? username : "Вход"}
+          </Link>
           <Link href="/" className={rulesButtonClass}>
             Назад
           </Link>

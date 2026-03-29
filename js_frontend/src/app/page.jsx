@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 
 const presetModes = [
@@ -30,6 +30,18 @@ const userButtonClass =
 
 export default function HomePage() {
   const [selectedMode, setSelectedMode] = useState("normal")
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [username, setUsername] = useState("")
+
+  useEffect(() => {
+    // Проверка авторизации при загрузке
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true'
+    const storedUsername = localStorage.getItem('username')
+    setIsLoggedIn(loggedIn)
+    if (storedUsername) {
+      setUsername(storedUsername)
+    }
+  }, [])
   const [customSettings, setCustomSettings] = useState({
     lives: 3,
     difficulty: "medium",
@@ -87,9 +99,9 @@ export default function HomePage() {
           <Link href="/rules" className={rulesButtonClass}>
             Правила
           </Link>
-          <div className={userButtonClass}>
-              User
-          </div>
+          <Link href={isLoggedIn ? "/profile" : "/login"} className={userButtonClass}>
+            {isLoggedIn ? username : "Вход"}
+          </Link>
         </div>
 
         <div className="grid py-10 flex-1 gap-14 md:mt-24 md:grid-cols-[0.92fr_1.08fr] md:gap-12">
