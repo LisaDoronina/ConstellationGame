@@ -25,14 +25,16 @@ def get_answer(request: MoveRequest):
             path=request.path,
             available_moves=request.available_moves
         )
-        print(answer)
+        print("[Model Main] ANSWER: ", answer)
         return {"answer": answer}
 
     except Exception as e:
+        print("[Model Main] ERROR: ", e)
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
         )
+
 
 if __name__ == "__main__":
     print("LISTENING ON http://0.0.0.0:8000")
