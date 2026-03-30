@@ -1,8 +1,6 @@
 package com.game.auth.repository;
 
 import com.game.auth.entity.User;
-import com.game.auth.service.PasswordService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
@@ -15,7 +13,6 @@ public class UserRepository {
   private final Map<Long, User> userStore = new ConcurrentHashMap<>();
   private final Map<String, User> usernameIndex = new ConcurrentHashMap<>();
   private final AtomicLong idGenerator = new AtomicLong(1);
-  private final PasswordService passwordService = new PasswordService(new BCryptPasswordEncoder());
 
   public User save(User user) {
     if (user.getId() == null) {
