@@ -7,7 +7,7 @@
     "predev": "npm run generate:constellations",
     "prebuild": "npm run generate:constellations",
     "prestart": "npm run generate:constellations",
-    "dev": "next dev",
+    "dev": "next dev", 
     "build": "next build",
     "start": "next start",
     "lint": "eslint ."

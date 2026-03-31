@@ -268,7 +268,7 @@ function GameContent() {
     setGameState(null)
 
     try {
-      const response = await fetch("/api/game/start", {
+      const response = await fetch("api/game/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lives }),
@@ -359,7 +359,7 @@ function GameContent() {
       setIsSubmitting(true)
 
       try {
-        const response = await fetch("/api/game/move", {
+        const response = await fetch("api/game/move", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ move: guess }),
