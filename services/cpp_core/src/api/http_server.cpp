@@ -2,6 +2,7 @@
 
 #include <httplib.h>
 
+#include <iostream>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -11,28 +12,46 @@ HttpServer::HttpServer(GameEngine& engine) : engine_(engine) {}
 void HttpServer::Run(int port) {
   httplib::Server server;
 
-  server.Post(
-      "/game/start", [&](const httplib::Request& req, httplib::Response& res) {
-        auto body = json::parse(req.body);
+  server.Post("/game/start",
+              [&](const httplib::Request& req, httplib::Response& res) {
+                std::cout << "[HTTP] /game/start called\n";
 
-        int lives = body["lives"];
+                auto body = json::parse(req.body);
 
-        engine_.InitGame(lives);
+                int lives = body["lives"];
 
-        res.set_content(engine_.GetStateJson().dump(), "application/json");
-      });
+                std::cout << "[HTTP] lives=" << lives << std::endl;
 
-  server.Post(
-      "/game/move", [&](const httplib::Request& req, httplib::Response& res) {
-        auto body = json::parse(req.body);
+                engine_.InitGame(lives);
 
-        std::string move = body["move"];
+                auto response = engine_.GetStateJson();
 
-        engine_.ProcessPlayerMove(move);
-        engine_.ProcessModelMove();
+                std::cout << "[HTTP] response=" << response.dump() << std::endl;
 
-        res.set_content(engine_.GetStateJson().dump(), "application/json");
-      });
+                res.set_content(response.dump(), "application/json");
+              });
+
+  server.Post("/game/move",
+              [&](const httplib::Request& req, httplib::Response& res) {
+                std::cout << "[HTTP] /game/move called\n";
+
+                auto body = json::parse(req.body);
+
+                std::string move = body["move"];
+
+                std::cout << "[HTTP] move=" << move << std::endl;
+
+                engine_.ProcessPlayerMove(move);
+                engine_.ProcessModelMove();
+
+                auto response = engine_.GetStateJson();
+
+                std::cout << "[HTTP] response=" << response.dump() << std::endl;
+
+                res.set_content(response.dump(), "application/json");
+              });
+
+  std::cout << "[HTTP] server started on port " << port << std::endl;
 
   server.listen("0.0.0.0", port);
 }
