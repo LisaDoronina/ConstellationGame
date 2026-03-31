@@ -74,19 +74,21 @@ class ModelService:
             raw_response = response.json()
             return raw_response
         except Exception as e:
-            print(e)
+            print("[Model Service] ERROR BY SENDING REQUEST: ", e)
             return None
 
     @staticmethod
     def parse_response(raw_response):
 
         if raw_response is None or "response" not in raw_response:
+            print("[Model Service] NO RESPONSE")
             return "No response received"
 
         response = raw_response["response"].strip()
         if "*" in response:
             response = response.replace("*", "")
 
+        print("[Model Service] model's response:", response)
         return response
 
     def get_answer(self, cur_state, end_state, path, available_moves):
