@@ -408,15 +408,11 @@ function GameContent() {
 
   const handleEndGame = useCallback(() => {
     if (gameState) {
-      setGameState((prev) =>
-        prev
-          ? {
-              ...prev,
-              gameStatus: "lost",
-              endReason: "РРіСЂР° Р·Р°РІРµСЂС€РµРЅР° РґРѕСЃСЂРѕС‡РЅРѕ",
-            }
-          : null
-      )
+      setGameState((prev) => prev ? {
+        ...prev,
+        gameStatus: "lost",
+        endReason: "Игра завершена досрочно",
+      } : null)
     }
   }, [gameState])
 
@@ -441,7 +437,7 @@ function GameContent() {
   if (!gameState) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground text-2xl tracking-[0.15em]">Р—Р°РіСЂСѓР·РєР°...</p>
+        <p className="text-muted-foreground text-2xl tracking-[0.15em]">Загрузка...</p>
       </main>
     )
   }
@@ -476,29 +472,31 @@ function GameContent() {
       )}
 
       <Link href={`/rules?returnTo=${encodeURIComponent(returnUrl)}`} className={topRightButtonClass}>
-        РџСЂР°РІРёР»Р°
+        Правила
       </Link>
 
       <Link
         href={isLoggedIn ? "/profile" : "/login"}
         className={`${topLeftUserClass} uppercase tracking-[0.18em] transition-all duration-200 hover:text-white hover:scale-105`}
       >
-        {isLoggedIn ? username : "Р’С…РѕРґ"}
+        {isLoggedIn ? username : "Вход"}
       </Link>
 
       <div className="relative z-10 mt-20 flex w-full max-w-6xl justify-between gap-8 md:mt-24">
         <div className="flex flex-col gap-1 text-left">
-          <p className="text-5xl font-bold tracking-[0.08em] text-white">РЎС‚Р°СЂС‚</p>
+          <p className="text-5xl font-bold tracking-[0.08em] text-white">Старт</p>
           <p className="text-5xl tracking-[0.08em] text-zinc-300">{gameState.startConstellation}</p>
         </div>
         <div className="flex flex-col gap-1 text-right">
-          <p className="text-5xl font-bold tracking-[0.08em] text-white">Р¤РёРЅРёС€</p>
+          <p className="text-5xl font-bold tracking-[0.08em] text-white">Финиш</p>
           <p className="text-5xl tracking-[0.08em] text-zinc-300">{gameState.targetConstellation}</p>
         </div>
       </div>
 
       <div className="relative z-10 mb-6 flex flex-col gap-1 text-center">
-        <p className="text-5xl tracking-[0.08em] text-white md:text-6xl text-bold ">РўРµРєСѓС‰РµРµ СЃРѕР·РІРµР·РґРёРµ</p>
+        <p className="text-5xl tracking-[0.08em] text-white md:text-6xl text-bold ">
+          Текущее созвездие
+        </p>
         <p className="text-5xl md:text-6xl font-bold text-foreground tracking-[0.12em] drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
           {gameState.currentConstellation}
         </p>
@@ -507,7 +505,7 @@ function GameContent() {
       <div className="w-24 h-px bg-foreground/20 mb-6 relative z-10" />
 
       <p className="text-4xl text-zinc-300 mb-4 relative z-10 tracking-[0.1em]">
-        {isSubmitting ? "Отправка хода..." : gameState.isPlayerTurn ? "Р’Р°С€ С…РѕРґ" : "РҐРѕРґ РР..."}
+        {gameState.isPlayerTurn ? "Ваш ход" : "Ход ИИ..."}
       </p>
 
       <form onSubmit={handleSubmit} className="w-full max-w-xl mb-4 relative z-10">
@@ -518,8 +516,8 @@ function GameContent() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Р’РІРµРґРёС‚Рµ СЃРѕР·РІРµР·РґРёРµ..."
-            disabled={!gameState.isPlayerTurn || gameState.gameStatus !== "playing" || isSubmitting}
+            placeholder="Введите созвездие..."
+            disabled={!gameState.isPlayerTurn || gameState.gameStatus !== "playing"}
             className="relative z-10 w-full bg-transparent border-b-2 border-foreground/30 text-foreground text-left text-4xl py-2 tracking-[0.08em] placeholder:text-zinc-600 focus:outline-none focus:border-foreground transition-colors disabled:opacity-50"
           />
           {autocomplete && autocomplete.toLowerCase() !== input.toLowerCase() && (
@@ -531,7 +529,7 @@ function GameContent() {
             </div>
           )}
         </div>
-        {autocomplete && <p className="text-2xl text-zinc-500 mt-2 text-left tracking-[0.08em]">Tab РґР»СЏ Р°РІС‚РѕРґРѕРїРѕР»РЅРµРЅРёСЏ</p>}
+        {autocomplete && <p className="text-2xl text-zinc-500 mt-2 text-left tracking-[0.08em]">Tab для автодополнения</p>}
       </form>
 
       {requestError && <p className="text-2xl mb-3 text-red-400 relative z-10 tracking-[0.08em]">{requestError}</p>}
@@ -543,12 +541,12 @@ function GameContent() {
           checkResult === "used" ? "text-amber-500" : "text-zinc-400 hover:text-zinc-300 disabled:opacity-30"
         }`}
       >
-        {checkResult === "used" ? "РЈР¶Рµ РЅР°Р·РІР°РЅРѕ" : checkResult === "unused" ? "Р•С‰С‘ РЅРµ РЅР°Р·РІР°РЅРѕ" : "РџСЂРѕРІРµСЂРёС‚СЊ"}
+        {checkResult === "used" ? "Уже названо" : checkResult === "unused" ? "Ещё не названо" : "Проверить"}
       </button>
 
       {showNeighbors && (
         <div className="mb-8 text-center relative z-10">
-          <p className="mb-2 text-2xl tracking-[0.12em] text-zinc-300">Р”РѕСЃС‚СѓРїРЅС‹Рµ СЃРѕСЃРµРґРё</p>
+          <p className="mb-2 text-2xl tracking-[0.12em] text-zinc-300">Доступные соседи</p>
           <div className="flex flex-wrap justify-center gap-2">
             {neighborMoves.map((move) => (
               <button
@@ -563,19 +561,25 @@ function GameContent() {
                 {move}
               </button>
             ))}
-            {neighborMoves.length === 0 && <p className="text-lg text-muted-foreground tracking-[0.1em]">РќРµС‚ РґРѕСЃС‚СѓРїРЅС‹С… С…РѕРґРѕРІ</p>}
+            {neighborMoves.length === 0 && (
+              <p className="text-lg text-muted-foreground tracking-[0.1em]">Нет доступных ходов</p>
+            )}
           </div>
         </div>
       )}
 
       {gameState.difficulty === "hard" && (
         <div className="mb-8 text-center relative z-10">
-          <p className="text-lg text-muted-foreground/60 tracking-[0.15em]">РР РёРіСЂР°РµС‚ СЃ РјР°РєСЃРёРјР°Р»СЊРЅРѕР№ С‚РѕС‡РЅРѕСЃС‚СЊСЋ</p>
+          <p className="text-lg text-muted-foreground/60 tracking-[0.15em]">
+            ИИ играет с максимальной точностью
+          </p>
         </div>
       )}
 
       <div className="fixed bottom-7 left-8 z-50 flex flex-col items-start md:bottom-12 md:left-14">
-        <p className="text-base text-muted-foreground/60 mb-1 uppercase tracking-[0.15em]">Р–РёР·РЅРё</p>
+        <p className="text-base text-muted-foreground/60 mb-1 uppercase tracking-[0.15em]">
+          Жизни
+        </p>
         <div className="flex gap-2">
           {Array.from({ length: gameState.maxLives }).map((_, i) => (
             <div
@@ -588,8 +592,12 @@ function GameContent() {
         </div>
       </div>
 
-      <button onClick={handleEndGame} className={bottomRightActionClass}>
-        Р—Р°РІРµСЂС€РёС‚СЊ
+      {/* End game button - bottom right with padding */}
+      <button
+        onClick={handleEndGame}
+        className={bottomRightActionClass}
+      >
+        Завершить
       </button>
     </main>
   )
@@ -600,7 +608,7 @@ export default function GamePage() {
     <Suspense
       fallback={
         <main className="min-h-screen bg-background flex items-center justify-center">
-          <p className="text-muted-foreground text-2xl tracking-[0.15em]">Р—Р°РіСЂСѓР·РєР°...</p>
+          <p className="text-muted-foreground text-2xl tracking-[0.15em]">Загрузка...</p>
         </main>
       }
     >
