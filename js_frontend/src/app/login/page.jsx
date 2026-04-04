@@ -26,7 +26,11 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
-    
+
+    console.log("API_BASE_URL:", API_BASE_URL)
+    console.log("Full URL:", `${API_BASE_URL}/api/auth/register`)
+
+
     if (!login.trim() || !password.trim()) {
       setError("Заполните все поля")
       return

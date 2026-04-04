@@ -71,14 +71,15 @@ export default function RegisterPage() {
       return
     }
 
-    if (password.length < 4) {
-      setError("Пароль должен быть не менее 4 символов")
+    if (password.length < 8) {  // Changed from 4 to 8 to match backend requirement
+      setError("Пароль должен быть не менее 8 символов")
       return
     }
 
     setIsLoading(true)
 
     try {
+      // Исправлено: добавляем confirmPassword в запрос
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
@@ -86,7 +87,8 @@ export default function RegisterPage() {
         },
         body: JSON.stringify({
           username: username.trim(),
-          password: password
+          password: password,
+          confirmPassword: confirmPassword  // ← ЭТО КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ
         })
       })
 
@@ -122,8 +124,14 @@ export default function RegisterPage() {
           router.push('/login')
         }
       } else {
-        // Registration failed
-        setError(data.error || "Ошибка при регистрации")
+        // Registration failed - show detailed error
+        if (data.errors) {
+          // Handle validation errors
+          const errorMessages = data.errors.map(err => err.message).join(', ')
+          setError(errorMessages)
+        } else {
+          setError(data.error || data.message || "Ошибка при регистрации")
+        }
       }
     } catch (err) {
       console.error('Registration error:', err)
@@ -200,7 +208,7 @@ export default function RegisterPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Придумайте пароль..."
+                    placeholder="Придумайте пароль (мин. 8 символов)..."
                     disabled={isLoading}
                     className="w-full bg-transparent border-b-2 border-foreground/30 text-foreground text-4xl py-2 tracking-[0.08em] placeholder:text-zinc-600 focus:outline-none focus:border-foreground transition-colors disabled:opacity-50"
                 />
