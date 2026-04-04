@@ -14,7 +14,7 @@ const actionButtonClass =
     "whitespace-nowrap text-center text-4xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-5xl"
 
 // API base URL - change this to your backend URL
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
 
 export default function RegisterPage() {
   const router = useRouter()
