@@ -64,6 +64,7 @@ void GameEngine::ProcessPlayerMove(const std::string& input) {
 
   if (!ValidateMove(state_.current_pos, move)) {
     std::cout << "[PlayerMove] not a neighbor\n";
+    state_.player_lives--;
     return;
   }
 
