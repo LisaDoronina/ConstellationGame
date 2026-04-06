@@ -1,16 +1,26 @@
 package com.game.auth.entity;
 
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Entity
+@Table(name="users")
 public class User {
 
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(unique = true, nullable = false)
   private String username;
 
+  @Column(nullable = false)
   private String passwordHash;
 
+  @Column(columnDefinition = "BIGINT[]")
   private List<Long> gameIds = new ArrayList<>();
 
   public User(String username, String passwordHash) {

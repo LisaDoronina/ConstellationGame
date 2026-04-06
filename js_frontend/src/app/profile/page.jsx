@@ -13,7 +13,7 @@ const topLeftUserClass =
 const logoutButtonClass =
     "fixed bottom-7 left-8 z-50 text-left text-3xl uppercase tracking-[0.14em] text-zinc-500 transition-all duration-200 hover:text-red-400 hover:scale-105 md:bottom-12 md:left-14 md:text-4xl"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
 
 // Заглушка для данных истории игр
 // TODO: Заменить на реальные данные с бэкенда
