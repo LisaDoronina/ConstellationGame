@@ -8,8 +8,9 @@ int main() {
   graph.LoadFromJson("data/constellations_graph.json");
   graph.LoadNames("data/names.json");
 
-  GameEngine engine(graph);
-  HttpServer server(engine);
+  GameRepository repo;
+  GameService service(repo, graph);
+  HttpServer server(service);
 
   server.Run(8080);
 

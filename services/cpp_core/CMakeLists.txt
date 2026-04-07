@@ -13,6 +13,9 @@ add_executable(constellation_game
     src/graph/constellation_graph.cpp
     src/model/model_stub.cpp
     src/api/http_server.cpp
+    src/service/game_service.cpp
+    src/service/game_repository.cpp
+    src/service/state_serializer.cpp
 )
 
 target_include_directories(constellation_game PRIVATE

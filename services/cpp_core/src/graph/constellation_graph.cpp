@@ -37,8 +37,16 @@ void ConstellationGraph::LoadNames(const std::string& path) {
   full_names_.resize(short_names_.size());
 
   for (auto& [short_name, full_name] : j.items()) {
-    int id = short_to_id_[short_name];
+    auto it = short_to_id_.find(short_name);
+    if (it == short_to_id_.end()) continue;
+
+    int id = it->second;
     full_names_[id] = full_name;
+  }
+  for (int i = 0; i < full_names_.size(); ++i) {
+    if (full_names_[i].empty()) {
+      full_names_[i] = short_names_[i];
+    }
   }
 }
 
