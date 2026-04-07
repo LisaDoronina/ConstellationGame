@@ -1,9 +1,12 @@
-import { Space_Mono, Plus_Jakarta_Sans } from 'next/font/google'
+import { Amatic_SC } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const spaceMono = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], variable: "--font-space-mono" });
-const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin", "latin-ext"], weight: ["300", "400", "500", "600", "700"], variable: "--font-plus-jakarta" });
+const amaticSc = Amatic_SC({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  weight: ["400", "700"],
+  variable: "--font-amatic-sc",
+});
 
 export const metadata = {
   title: 'Созвездия — Игра',
@@ -31,7 +34,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ru" className="dark">
-      <body className={`${plusJakartaSans.variable} ${spaceMono.variable} font-sans antialiased`}>
+      <body className={`${amaticSc.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>

@@ -5,7 +5,7 @@
 int main() {
   ConstellationGraph graph;
 
-  graph.LoadFromJson("data/constellations_graph.json");
+  graph.LoadFromPythonGraph("data/graph.py");
   graph.LoadNames("data/names.json");
 
   GameRepository repo;

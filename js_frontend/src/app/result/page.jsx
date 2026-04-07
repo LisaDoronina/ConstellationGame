@@ -1,95 +1,111 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
 
+const rulesButtonClass =
+  "fixed top-7 right-8 z-50 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white md:top-12 md:right-14 md:text-5xl"
+
+const topLeftUserClass =
+  "fixed top-7 left-8 z-50 text-left text-4xl text-zinc-300 md:top-12 md:left-14 md:text-5xl"
+
+const actionButtonClass =
+  "pointer-events-auto whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-6xl"
+
 function ResultContent() {
   const searchParams = useSearchParams()
-  
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [username, setUsername] = useState("")
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem('isLoggedIn') === 'true'
+    const storedUsername = localStorage.getItem('username')
+    setIsLoggedIn(loggedIn)
+    if (storedUsername) {
+      setUsername(storedUsername)
+    }
+  }, [])
+
   const result = searchParams.get("result") || "lost"
   const reason = searchParams.get("reason") || "Неизвестная причина"
   const start = searchParams.get("start") || "—"
   const target = searchParams.get("target") || "—"
+  const rawPath = searchParams.get("path")
 
-  const isWon = result === "won"
+  let path = []
+  try {
+    path = rawPath ? JSON.parse(rawPath) : []
+  } catch {
+    path = []
+  }
+
+  const imageUrl =
+    path.length > 0 ? `/api/path-image?path=${encodeURIComponent(JSON.stringify(path))}` : null
 
   return (
-    <main className="min-h-screen bg-background flex flex-col items-center justify-center px-4 py-8">
-      {/* Start and Target - bigger */}
-      <div className="w-full max-w-3xl flex justify-between items-start mb-12">
-        <div className="text-left">
-          <p className="text-base uppercase tracking-widest text-muted-foreground mb-2">Старт</p>
-          <p className="text-3xl md:text-4xl font-display text-foreground tracking-wide">{start}</p>
+    <main className="relative isolate min-h-screen w-full bg-background py-7 md:py-12  overflow-x-hidden">
+        <img
+                src="/background_v3.jpg"
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none fixed inset-0 -z-20 h-full w-full object-cover"
+         />
+      <div className=" w-full pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
+        <div className="relative mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-6xl flex-col">
+          <div className="relative mx-auto">
+            <h1 className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 text-center whitespace-nowrap text-6xl font-bold uppercase tracking-[0.2em] text-foreground">
+              {result === "won" ? "Победа" : "Поражение"}
+            </h1>
+          <Link href={isLoggedIn ? "/profile" : "/login"} className={`${topLeftUserClass} uppercase tracking-[0.18em] transition-all duration-200 hover:text-white hover:scale-105`}>
+            {isLoggedIn ? username : "Вход"}
+          </Link>
+          <Link href="/" className={rulesButtonClass}>
+            Назад
+          </Link>
         </div>
-        <div className="text-right">
-          <p className="text-base uppercase tracking-widest text-muted-foreground mb-2">Финиш</p>
-          <p className="text-3xl md:text-4xl font-display text-foreground tracking-wide">{target}</p>
+
+        <div className="mt-28 flex justify-between gap-8">
+          <div className="text-left">
+            <p className="text-5xl font-bold tracking-[0.08em] text-white">Старт</p>
+            <p className="ml-12 text-5xl tracking-[0.08em] text-zinc-400">{start}</p>
+          </div>
+
+          <div className="text-right">
+            <p className="text-5xl font-bold tracking-[0.08em] text-white">Финиш</p>
+            <p className="ml-12 text-5xl tracking-[0.08em] text-zinc-400">{target}</p>
+          </div>
         </div>
-      </div>
 
-      {/* Result */}
-      <div className="text-center mb-8">
-        <h1 className="text-5xl md:text-6xl font-display tracking-widest text-foreground mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
-          {isWon ? "ПОБЕДА" : "ПОРАЖЕНИЕ"}
-        </h1>
-        <div className="w-24 h-px bg-foreground/30 mx-auto mb-4" />
-        <p className="text-muted-foreground text-lg tracking-wide">{reason}</p>
-      </div>
+        <div className="mt-10 flex flex-1 flex-col items-center justify-center gap-8">
+          {imageUrl ? (
+            <div className="flex w-full max-w-5xl items-center justify-center overflow-hidden border border-foreground/20 bg-foreground/5">
+              <img src={imageUrl} alt="Маршрут партии" className="h-auto w-full object-contain" />
+            </div>
+          ) : (
+            <div className="flex min-h-[28rem] w-full max-w-5xl items-center justify-center border border-foreground/20 bg-foreground/5">
+              <p className="text-5xl tracking-[0.08em] text-zinc-500">Изображение маршрута недоступно</p>
+            </div>
+          )}
 
-      {/* Star map placeholder */}
-      <div className="w-full max-w-xl aspect-video border border-foreground/20 flex items-center justify-center mb-12 relative overflow-hidden">
-        {/* Starry background effect */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background to-muted/20">
-          {/* Decorative stars - fixed positions to avoid hydration mismatch */}
-          {[
-            { top: 10, left: 15, opacity: 0.4 },
-            { top: 25, left: 80, opacity: 0.6 },
-            { top: 40, left: 30, opacity: 0.3 },
-            { top: 55, left: 65, opacity: 0.5 },
-            { top: 70, left: 20, opacity: 0.7 },
-            { top: 85, left: 75, opacity: 0.4 },
-            { top: 15, left: 50, opacity: 0.5 },
-            { top: 35, left: 90, opacity: 0.3 },
-            { top: 60, left: 45, opacity: 0.6 },
-            { top: 80, left: 55, opacity: 0.4 },
-            { top: 20, left: 35, opacity: 0.5 },
-            { top: 45, left: 10, opacity: 0.7 },
-            { top: 65, left: 85, opacity: 0.3 },
-            { top: 90, left: 40, opacity: 0.5 },
-            { top: 30, left: 70, opacity: 0.4 },
-            { top: 50, left: 25, opacity: 0.6 },
-            { top: 75, left: 60, opacity: 0.3 },
-            { top: 5, left: 95, opacity: 0.5 },
-            { top: 95, left: 5, opacity: 0.4 },
-            { top: 48, left: 52, opacity: 0.6 },
-          ].map((star, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-foreground/40 rounded-full"
-              style={{
-                top: `${star.top}%`,
-                left: `${star.left}%`,
-                opacity: star.opacity,
-              }}
-            />
-          ))}
+          <div className="w-full max-w-5xl">
+            <p className="text-4xl tracking-[0.08em] text-zinc-400">
+              {path.length > 0 ? path.join(" → ") : reason}
+            </p>
+          </div>
         </div>
-        <p className="text-muted-foreground text-sm uppercase tracking-widest z-10">
-          Визуализация маршрута
-        </p>
+
+
       </div>
-
-      {/* Divider */}
-      <div className="w-32 h-px bg-foreground/20 mb-8" />
-
-      {/* Single action - На главную */}
-      <Link
-        href="/"
-        className="text-3xl md:text-4xl font-display tracking-widest text-foreground hover:text-foreground/80 transition-all duration-200 uppercase"
-      >
-        На главную
-      </Link>
+          <div className="absolute bottom-7 right-20 flex justify-end center-right">
+            <Link
+              href="/"
+              className={actionButtonClass}
+            >
+              На главную
+            </Link>
+          </div>
     </main>
   )
 }
@@ -99,7 +115,7 @@ export default function ResultPage() {
     <Suspense
       fallback={
         <main className="min-h-screen bg-background flex items-center justify-center">
-          <p className="text-muted-foreground">Загрузка...</p>
+          <p className="text-4xl tracking-[0.08em] text-zinc-400">Загрузка...</p>
         </main>
       }
     >
@@ -107,3 +123,5 @@ export default function ResultPage() {
     </Suspense>
   )
 }
+
+

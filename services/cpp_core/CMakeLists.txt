@@ -28,3 +28,4 @@ target_link_libraries(constellation_game PRIVATE
 )
 
 file(COPY data DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ../../python_ml/resources/graph.py DESTINATION ${CMAKE_BINARY_DIR}/data)

@@ -12,4 +12,9 @@
 
 - to run tests ```python python_ml/test/test_model_service.py```
 
-- to run the server ```python python_ml/src/main.py```
+- to run the server ```python python_ml/src/main.py``` or ```python -m python_ml.src.main```
+
+- to run front:
+```cd js_frontend\src```
+```npm install```
+```npm run dev```

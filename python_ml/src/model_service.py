@@ -19,7 +19,7 @@ class ModelService:
 
         return neighbors
 
-    def create_prompt(self, cur_state, end_state, path, available_moves):
+    def create_prompt_smart(self, cur_state, end_state, path, available_moves):
 
         available_neighbors = self.get_neighbors(available_moves)
         neighbors = ""
@@ -29,7 +29,7 @@ class ModelService:
 
         prompt = f"""RULES:
     1. Ur goal is to WIN
-    2. If u move to {end_state} - you WIN 
+    2. If u move to {end_state} - you WIN
     3. If ur opponent has no valid moves - they LOSE
     4. U CANNOT move to *** in {path}
     5. U can only move to DIRECTLY CONNECTED *** in {available_moves}
@@ -44,14 +44,30 @@ class ModelService:
     - For each candidate *** (connected to {cur_state} and not in {path}):
       * If {end_state} is in ***'s neighbors → AVOID
     - Choose a SAFE *** if available, else: random ***
-    
-    3 - CHECK FUTURE 
+
+    3 - CHECK FUTURE
     - if you go to ***, player goes to $$$ from *** and u have NO MOVES from $$$ - AVOID ***
-    
+
     AVAILABLE MOVES: {available_moves} \n
     {neighbors}
-    
+
     ANSWER IN ONE WORD"""
+
+        return prompt
+
+    def create_prompt(self, cur_state, end_state, available_moves):
+        """simple version for simple model"""
+        prompt = f"""Goal: Reach {end_state} (win immediately if you move there)
+    Possible moves: {available_moves}
+
+    Rules:
+    1. ONLY IF {end_state} is in {available_moves}, choose it
+    2. ELSE: choose any move from {available_moves}
+
+    Choose ONE name from the possible moves list.
+    Reply with ONLY name, nothing else.
+
+    Your move:"""
 
         return prompt
 
@@ -74,23 +90,33 @@ class ModelService:
             raw_response = response.json()
             return raw_response
         except Exception as e:
-            print(e)
+            print("[Model Service] ERROR BY SENDING REQUEST: ", e)
             return None
 
     @staticmethod
     def parse_response(raw_response):
 
         if raw_response is None or "response" not in raw_response:
+            print("[Model Service] NO RESPONSE")
             return "No response received"
 
         response = raw_response["response"].strip()
         if "*" in response:
             response = response.replace("*", "")
 
+        print("[Model Service] model's response:", response)
         return response
 
+    def validate_available_moves(self, path, available_moves):
+        for vertex in path:
+            if vertex in available_moves:
+                available_moves.remove(vertex)
+        return available_moves
+
     def get_answer(self, cur_state, end_state, path, available_moves):
-        prompt = self.create_prompt(cur_state, end_state, path, available_moves)
+        available_moves = self.validate_available_moves(path, available_moves)
+        print(path, available_moves)
+        prompt = self.create_prompt(cur_state, end_state, available_moves)
         raw_response = self.send_request(prompt)
         response = self.parse_response(raw_response)
         return response
