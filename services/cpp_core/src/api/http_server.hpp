@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../engine/game_engine.hpp"
+#include "service/game_service.hpp"
 
 class HttpServer {
  public:
-  HttpServer(GameEngine& engine);
+  HttpServer(GameService& service);
 
   void Run(int port);
 
  private:
-  GameEngine& engine_;
+  GameService& service_;
 };
