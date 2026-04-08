@@ -10,7 +10,7 @@
 
 class GameEngine {
  public:
-  GameEngine(ConstellationGraph graph);
+  GameEngine(ConstellationGraph& graph);
 
   void InitGame(int lives);
   void ProcessPlayerMove(const std::string& input);
@@ -18,13 +18,16 @@ class GameEngine {
 
   nlohmann::json GetStateJson() const;
 
+  void LoadState(const GameState& state);
+  GameState GetState() const;
+
  private:
   bool ValidateMove(int from, int to) const;
   void ApplyMove(int move);
   void CheckGameOver();
 
  private:
-  ConstellationGraph graph_;
+  ConstellationGraph& graph_;
   GameState state_;
   ModelService model_;
 };

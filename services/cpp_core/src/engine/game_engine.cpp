@@ -13,7 +13,7 @@ static std::string NormalizeMove(const std::string& input) {
   return result;
 }
 
-GameEngine::GameEngine(ConstellationGraph graph) : graph_(graph) {}
+GameEngine::GameEngine(ConstellationGraph& graph) : graph_(graph) {}
 
 void GameEngine::InitGame(int lives) {
   std::cout << "[InitGame] lives=" << lives << std::endl;
@@ -189,3 +189,7 @@ json GameEngine::GetStateJson() const {
 
   return j;
 }
+
+void GameEngine::LoadState(const GameState& state) { state_ = state; }
+
+GameState GameEngine::GetState() const { return state_; }

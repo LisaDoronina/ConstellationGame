@@ -6,7 +6,7 @@
 
 class ConstellationGraph {
  public:
-  void LoadFromPythonGraph(const std::string& path);
+  void LoadFromJson(const std::string& path);
   void LoadNames(const std::string& path);
 
   int GetId(const std::string& short_name) const;
