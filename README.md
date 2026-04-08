@@ -19,7 +19,10 @@
 ```npm install```
 ```npm run dev```
 
-- to run c++ service: ?
+- to run c++ service: 
+```cd services/cpp_core/build```
+```make```
+```./constellation_game```
 
 - to run java service:
 ```mvn spring-boot:run```
