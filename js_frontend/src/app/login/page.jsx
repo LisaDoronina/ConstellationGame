@@ -16,7 +16,7 @@ const actionButtonClass =
 const secondaryButtonClass =
     "whitespace-nowrap text-center text-3xl uppercase tracking-[0.14em] text-zinc-500 transition-all duration-200 hover:scale-105 hover:text-zinc-300 md:text-4xl"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
 
 export default function LoginPage() {
   const router = useRouter()
