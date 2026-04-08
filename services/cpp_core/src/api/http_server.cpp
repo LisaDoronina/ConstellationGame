@@ -13,14 +13,20 @@ void HttpServer::Run(int port) {
 
   server.Post("/game/start",
               [&](const httplib::Request& req, httplib::Response& res) {
-                auto body = json::parse(req.body);
+                try {
+                  auto body = json::parse(req.body);
 
-                int user_id = body["user_id"];
-                int lives = body["lives"];
+                  int user_id = body["user_id"];
+                  int lives = body["lives"];
 
-                auto response = service_.StartGame(user_id, lives);
+                  auto response = service_.StartGame(user_id, lives);
 
-                res.set_content(response.dump(), "application/json");
+                  res.set_content(response.dump(), "application/json");
+                } catch (const std::exception& e) {
+                  std::cerr << "[ERROR] " << e.what() << std::endl;
+                  res.status = 500;
+                  res.set_content("internal error", "text/plain");
+                }
               });
 
   server.Post("/game/move",

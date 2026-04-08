@@ -1,9 +1,7 @@
 #pragma once
 
 #include <optional>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <pqxx/pqxx>
 
 #include "state/game_state.hpp"
 
@@ -17,6 +15,8 @@ struct GameRecord {
 
 class GameRepository {
  public:
+  GameRepository(const std::string& conn_str);
+
   std::optional<GameRecord> GetLastActiveGame(int user_id);
 
   int CreateGame(int user_id, const GameState& state);
@@ -27,7 +27,5 @@ class GameRepository {
                   const std::string& winner);
 
  private:
-  int next_id_ = 1;
-  std::unordered_map<int, GameRecord> games_;
-  std::vector<int> order_;
+  pqxx::connection conn_;
 };
