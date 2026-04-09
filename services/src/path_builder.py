@@ -172,7 +172,7 @@ def plot_wrapped_line(axis, x, y, **kwargs):
                 y_cross = y1 + t * (y2 - y1)
                 seg_x.append(360)
                 seg_y.append(y_cross)
-                axis.plot(seg_x, seg_y, **kwargs)
+                axis.plot(seg_x, seg_y, solid_joinstyle="round", solid_capstyle="round", **kwargs)
                 seg_x = [0, x2]
                 seg_y = [y_cross, y2]
             else:
@@ -180,14 +180,14 @@ def plot_wrapped_line(axis, x, y, **kwargs):
                 y_cross = y1 + t * (y2 - y1)
                 seg_x.append(0)
                 seg_y.append(y_cross)
-                axis.plot(seg_x, seg_y, **kwargs)
+                axis.plot(seg_x, seg_y, solid_joinstyle="round", solid_capstyle="round", **kwargs)
                 seg_x = [360, x2]
                 seg_y = [y_cross, y2]
         else:
             seg_x.append(x2)
             seg_y.append(y2)
 
-    axis.plot(seg_x, seg_y, **kwargs)
+    axis.plot(seg_x, seg_y, solid_joinstyle="round", solid_capstyle="round", **kwargs)
 
 
 def build_path_image(path_items, output_path):

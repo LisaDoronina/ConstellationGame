@@ -34,15 +34,18 @@ function toFullConstellationName(name) {
 function ThinkingDots() {
   return (
     <div
-      className="mx-auto flex w-fit items-center justify-center gap-[10px]"
+      className="mx-auto flex w-fit items-center justify-center gap-[14px]"
       aria-label="ИИ думает"
       role="status"
     >
       {[0, 1, 2].map((index) => (
         <span
           key={index}
-          className="block h-4 w-3 rounded-full bg-zinc-300 thinking-dot will-change-transform"
-          style={{ animationDelay: `${index * 0.2}s` }}
+          className="block h-4 w-3 rounded-full bg-zinc-300 will-change-transform"
+          style={{
+            animation: "thinkingBounce 0.9s ease-in-out infinite",
+            animationDelay: `${index * 0.18}s`,
+          }}
         />
       ))}
     </div>
@@ -701,18 +704,16 @@ function GameContent() {
         Завершить
       </button>
 
-      <style jsx>{`
-        .thinking-dot {
-          animation: thinkingBounce 0.6s ease-in-out infinite alternate;
-        }
-
+      <style jsx global>{`
         @keyframes thinkingBounce {
-          from {
+          0%,
+          60%,
+          100% {
             transform: translateY(0);
           }
 
-          to {
-            transform: translateY(-18px);
+          30% {
+            transform: translateY(-12px);
           }
         }
       `}</style>
