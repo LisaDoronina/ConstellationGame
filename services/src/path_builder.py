@@ -260,13 +260,36 @@ def build_path_image(path_items, output_path):
     if centers_ra and centers_dec:
         order = [center_names.index(name) for name in fill_names if name in center_names]
         order = np.array(order)
+        ordered_ra = np.array(centers_ra)[order]
+        ordered_dec = np.array(centers_dec)[order]
+        ordered_names = np.array(center_names, dtype=object)[order]
+
         plot_wrapped_line(
             axis,
-            np.array(centers_ra)[order],
-            np.array(centers_dec)[order],
+            ordered_ra,
+            ordered_dec,
             color="#29d17d",
             linewidth=2.5,
             zorder=10,
+        )
+
+        axis.scatter(
+            [ordered_ra[0]],
+            [ordered_dec[0]],
+            color="#29d17d",
+            s=55,
+            zorder=11,
+        )
+
+        axis.text(
+            ordered_ra[0],
+            ordered_dec[0] + 4,
+            ordered_names[0],
+            color="#29d17d",
+            fontsize=10,
+            ha="center",
+            va="bottom",
+            zorder=12,
         )
 
     axis.set_facecolor("#090b17")

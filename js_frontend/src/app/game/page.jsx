@@ -41,7 +41,7 @@ function ThinkingDots() {
       {[0, 1, 2].map((index) => (
         <span
           key={index}
-          className="block h-4 w-4 rounded-full bg-zinc-300 thinking-dot will-change-transform"
+          className="block h-4 w-3 rounded-full bg-zinc-300 thinking-dot will-change-transform"
           style={{ animationDelay: `${index * 0.2}s` }}
         />
       ))}
@@ -589,7 +589,7 @@ function GameContent() {
         </div>
       </div>
 
-      <div className="relative z-10 mb-6 flex flex-col gap-1 text-center">
+      <div className="relative z-10 mb-6 flex w-full max-w-3xl flex-col items-center gap-1 text-center">
         <p className="text-5xl tracking-[0.08em] text-white md:text-6xl text-bold ">
           Текущее созвездие
         </p>
@@ -598,14 +598,15 @@ function GameContent() {
         </p>
       </div>
 
-      <div className="relative z-10 mb-6 h-px w-24 self-center bg-foreground/20" />
-
-      <div className="relative z-10 mb-4 flex min-h-[2.5rem] w-full items-center justify-center self-center tracking-[0.1em] text-zinc-300">
-        {isWaitingForModel || !gameState.isPlayerTurn ? (
-          <ThinkingDots />
-        ) : (
-          <p className="text-4xl">Ваш ход</p>
-        )}
+      <div className="relative z-10 mb-4 flex w-full max-w-3xl flex-col items-center">
+        <div className="mb-6 h-px w-24 bg-foreground/20" />
+        <div className="flex min-h-[2.5rem] items-center justify-center tracking-[0.1em] text-zinc-300">
+          {isWaitingForModel || !gameState.isPlayerTurn ? (
+            <ThinkingDots />
+          ) : (
+            <p className="text-4xl text-center">Ваш ход</p>
+          )}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="w-full max-w-xl mb-4 relative z-10">
