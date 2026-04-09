@@ -36,33 +36,6 @@ const mockGameHistory = [
     targetConstellation: "Скорпион",
     path: ["Большая Медведица", "Малая Медведица", "Дракон", "Цефей"],
   },
-  {
-    id: "game-3",
-    startTime: "2025-03-26T10:45:00",
-    difficulty: "Сложный",
-    result: "abandoned",
-    startConstellation: "Кассиопея",
-    targetConstellation: "Центавр",
-    path: ["Кассиопея", "Персей", "Телец"],
-  },
-  {
-    id: "game-4",
-    startTime: "2025-03-25T21:00:00",
-    difficulty: "Средний",
-    result: "victory",
-    startConstellation: "Лебедь",
-    targetConstellation: "Орел",
-    path: ["Лебедь", "Лисичка", "Стрела", "Орел"],
-  },
-  {
-    id: "game-5",
-    startTime: "2025-03-24T16:20:00",
-    difficulty: "Легкий",
-    result: "defeat",
-    startConstellation: "Близнецы",
-    targetConstellation: "Дева",
-    path: ["Близнецы", "Рак", "Лев"],
-  },
 ]
 
 function formatDateTime(isoString) {

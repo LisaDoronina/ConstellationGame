@@ -14,6 +14,24 @@ const topLeftUserClass =
 const bottomRightActionClass =
   "fixed bottom-7 right-8 z-50 whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:bottom-12 md:right-14 md:text-6xl"
 
+function ThinkingDots() {
+  return (
+    <div
+      className="flex w-full items-center justify-center gap-[10px]"
+      aria-label="ИИ думает"
+      role="status"
+    >
+      {[0, 1, 2].map((index) => (
+        <span
+          key={index}
+          className="block h-4 w-3 rounded-full bg-zinc-300 thinking-dot will-change-transform"
+          style={{ animationDelay: `${index * 0.2}s` }}
+        />
+      ))}
+    </div>
+  )
+}
+
 function asArray(value) {
   if (Array.isArray(value)) return value
   if (value == null) return []
@@ -251,6 +269,7 @@ function GameContent() {
   const [checkResult, setCheckResult] = useState(null)
   const [requestError, setRequestError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isWaitingForModel, setIsWaitingForModel] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [username, setUsername] = useState("")
   const [userId, setUserId] = useState(null)
@@ -344,6 +363,47 @@ function GameContent() {
     setTimeout(() => setFeedback(null), 400)
   }, [])
 
+  const requestModelMove = useCallback(async (previousState) => {
+    if (!Number.isInteger(userId) || userId <= 0) {
+      setRequestError("Не удалось выполнить ход ИИ")
+      setIsWaitingForModel(false)
+      return
+    }
+
+    try {
+      const response = await fetch("api/game/model-move", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      })
+
+      const payload = await readResponsePayload(response)
+
+      if (!response.ok) {
+        setRequestError(payload?.error || "Не удалось выполнить ход ИИ")
+        return
+      }
+
+      const nextState = normalizeGameState(payload, {
+        initialLives: lives,
+        difficulty,
+        inputMethod,
+        previousState,
+      })
+
+      if (!nextState) {
+        setRequestError("Бэкенд вернул неполное состояние игры")
+        return
+      }
+
+      setGameState(nextState)
+    } catch {
+      setRequestError("Не удалось выполнить ход ИИ")
+    } finally {
+      setIsWaitingForModel(false)
+    }
+  }, [difficulty, inputMethod, lives, userId])
+
   const checkIfUsed = useCallback(() => {
     if (!gameState || !input.trim()) {
       setCheckResult(null)
@@ -370,6 +430,7 @@ function GameContent() {
       setAutocomplete(null)
       setRequestError("")
       setIsSubmitting(true)
+      setIsWaitingForModel(false)
 
       try {
         const response = await fetch("api/game/move", {
@@ -397,6 +458,11 @@ function GameContent() {
         }
 
         showFeedback("success")
+
+        if (nextState && !nextState.isPlayerTurn && nextState.gameStatus === "playing") {
+          setIsWaitingForModel(true)
+          void requestModelMove(nextState)
+        }
       } catch {
         setRequestError("Не удалось отправить ход")
         showFeedback("error")
@@ -404,7 +470,7 @@ function GameContent() {
         setIsSubmitting(false)
       }
     },
-    [difficulty, gameState, inputMethod, isSubmitting, lives, showFeedback, userId]
+    [difficulty, gameState, inputMethod, isSubmitting, lives, requestModelMove, showFeedback, userId]
   )
 
   const handleSubmit = useCallback(
@@ -517,9 +583,13 @@ function GameContent() {
 
       <div className="w-24 h-px bg-foreground/20 mb-6 relative z-10" />
 
-      <p className="text-4xl text-zinc-300 mb-4 relative z-10 tracking-[0.1em]">
-        {gameState.isPlayerTurn ? "Ваш ход" : "Ход ИИ..."}
-      </p>
+      <div className="relative z-10 mb-4 flex min-h-[2.5rem] w-full items-center justify-center tracking-[0.1em] text-zinc-300">
+        {isWaitingForModel || !gameState.isPlayerTurn ? (
+          <ThinkingDots />
+        ) : (
+          <p className="text-4xl">Ваш ход</p>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit} className="w-full max-w-xl mb-4 relative z-10">
         <div className="relative">
@@ -530,7 +600,7 @@ function GameContent() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Введите созвездие..."
-            disabled={!gameState.isPlayerTurn || gameState.gameStatus !== "playing"}
+            disabled={!gameState.isPlayerTurn || gameState.gameStatus !== "playing" || isWaitingForModel}
             className="relative z-10 w-full bg-transparent border-b-2 border-foreground/30 text-foreground text-left text-4xl py-2 tracking-[0.08em] placeholder:text-zinc-600 focus:outline-none focus:border-foreground transition-colors disabled:opacity-50"
           />
           {autocomplete && autocomplete.toLowerCase() !== input.toLowerCase() && (
@@ -549,7 +619,7 @@ function GameContent() {
 
       <button
         onClick={checkIfUsed}
-        disabled={!input.trim()}
+        disabled={!input.trim() || isWaitingForModel}
         className={`text-4xl mb-6 transition-colors duration-200 relative z-10 tracking-[0.08em] ${
           checkResult === "used" ? "text-amber-500" : "text-zinc-400 hover:text-zinc-300 disabled:opacity-30"
         }`}
@@ -612,6 +682,22 @@ function GameContent() {
       >
         Завершить
       </button>
+
+      <style jsx>{`
+        .thinking-dot {
+          animation: thinkingBounce 0.6s ease-in-out infinite alternate;
+        }
+
+        @keyframes thinkingBounce {
+          from {
+            transform: translateY(0);
+          }
+
+          to {
+            transform: translateY(-18px);
+          }
+        }
+      `}</style>
     </main>
   )
 }

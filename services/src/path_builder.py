@@ -68,6 +68,35 @@ def normalize_path(path_items):
     return normalized
 
 
+def parse_path_argument(raw_path):
+    if isinstance(raw_path, list):
+        print(f"[path_builder] path already list: {raw_path}")
+        return raw_path
+
+    if raw_path is None:
+        print("[path_builder] raw path is None")
+        return []
+
+    text = str(raw_path).strip()
+    print(f"[path_builder] raw path argument: {text}")
+    if not text:
+        print("[path_builder] raw path is empty after trim")
+        return []
+
+    try:
+        parsed = json.loads(text)
+        if isinstance(parsed, list):
+            print(f"[path_builder] parsed JSON path: {parsed}")
+            return parsed
+    except json.JSONDecodeError:
+        print("[path_builder] raw path is not valid JSON, trying comma-separated parser")
+        pass
+
+    parsed_items = [item.strip() for item in text.split(",") if item.strip()]
+    print(f"[path_builder] parsed CSV path: {parsed_items}")
+    return parsed_items
+
+
 def fill_segment_to_edge(axis, sra, sdec, color="#00e600", alpha=0.2, zorder=1):
     sra = np.asarray(sra)
     sdec = np.asarray(sdec)
@@ -164,6 +193,8 @@ def plot_wrapped_line(axis, x, y, **kwargs):
 def build_path_image(path_items, output_path):
     const, ra, dec = load_boundaries()
     fill_names = normalize_path(path_items)
+    print(f"[path_builder] normalized path: {fill_names}")
+    print(f"[path_builder] output path: {output_path}")
 
     figure, axis = plt.subplots(figsize=(12, 6), facecolor="#090b17")
     centers_ra = []
@@ -253,11 +284,16 @@ def build_path_image(path_items, output_path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path-json", required=True, help="JSON array with path items")
+    parser.add_argument(
+        "--path-json",
+        required=True,
+        help="Path items either as JSON array or as comma-separated string like 'CMA, MON, ORI'",
+    )
     parser.add_argument("--output", required=True, help="Output PNG path")
     args = parser.parse_args()
 
-    path_items = json.loads(args.path_json)
+    path_items = parse_path_argument(args.path_json)
+    print(f"[path_builder] building image for path items: {path_items}")
     build_path_image(path_items, args.output)
 
 

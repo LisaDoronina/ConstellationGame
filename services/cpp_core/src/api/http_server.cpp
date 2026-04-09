@@ -79,6 +79,30 @@ void HttpServer::Run(int port) {
                 }
               });
 
+  server.Post("/game/model-move",
+              [&](const httplib::Request& req, httplib::Response& res) {
+                try {
+                  auto body = json::parse(req.body);
+
+                  if (!body.contains("user_id") || body["user_id"].is_null() ||
+                      !body["user_id"].is_number_integer()) {
+                    res.status = 400;
+                    res.set_content(R"({"error":"user_id is required"})",
+                                    "application/json");
+                    return;
+                  }
+
+                  int user_id = body["user_id"].get<int>();
+                  auto response = service_.MakeModelMove(user_id);
+
+                  res.set_content(response.dump(), "application/json");
+                } catch (const std::exception& e) {
+                  std::cerr << "[ERROR] " << e.what() << std::endl;
+                  res.status = 500;
+                  res.set_content("internal error", "text/plain");
+                }
+              });
+
   std::cout << "[HTTP] server started on port " << port << std::endl;
   server.listen("0.0.0.0", port);
 }
