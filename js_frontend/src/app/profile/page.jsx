@@ -193,7 +193,7 @@ export default function ProfilePage() {
       localStorage.removeItem('isLoggedIn')
 
       // Перенаправляем на главную страницу
-      router.push('/')
+      router.push('/login')
     }
   }
 
@@ -227,7 +227,7 @@ export default function ProfilePage() {
             <h1 className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap text-center text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
               История игр
             </h1>
-            <Link href="/" className={topRightButtonClass}>
+            <Link href="/menu" className={topRightButtonClass}>
               К игре
             </Link>
             <div className={topLeftUserClass}>
@@ -242,7 +242,7 @@ export default function ProfilePage() {
                     История игр пуста
                   </p>
                   <Link
-                      href="/"
+                      href="/menu"
                       className="mt-8 text-4xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white"
                   >
                     Начать игру

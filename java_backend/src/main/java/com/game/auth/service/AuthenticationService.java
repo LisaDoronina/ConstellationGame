@@ -21,7 +21,7 @@ public class AuthenticationService {
 
   public User register(RegisterRequest request) {
     if (!passwordService.isStrongPassword(request.getPassword())) {
-      throw new RuntimeException("Password must be at least 8 characters and contain uppercase, lowercase, digit, and special character");
+      throw new RuntimeException("Password must be at least 6 characters");
     }
 
     if (!request.getPassword().equals(request.getConfirmPassword())) {

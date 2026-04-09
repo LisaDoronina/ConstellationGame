@@ -16,16 +16,24 @@ std::optional<GameRecord> GameRepository::GetLastActiveGame(int user_id) {
 
   if (r.empty()) return std::nullopt;
 
-  GameRecord rec;
-  rec.game_id = r[0]["id"].as<int>();
-  rec.user_id = user_id;
-  rec.is_finished = r[0]["finished"].as<bool>();
-  rec.winner = r[0]["winner"].is_null() ? "" : r[0]["winner"].as<std::string>();
+  try {
+    GameRecord rec;
+    rec.game_id = r[0]["id"].as<int>();
+    rec.user_id = user_id;
+    rec.is_finished = r[0]["finished"].as<bool>();
+    rec.winner = r[0]["winner"].is_null() ? "" : r[0]["winner"].as<std::string>();
 
-  auto json_state = nlohmann::json::parse(r[0]["path"].c_str());
-  rec.state = DeserializeState(json_state);
+    auto json_state = nlohmann::json::parse(r[0]["path"].c_str());
+    rec.state = DeserializeState(json_state);
 
-  return rec;
+    return rec;
+  } catch (const std::exception&) {
+    txn.exec_params(
+        "UPDATE games SET finished = true, winner = $1 WHERE id = $2",
+        "invalid_state", r[0]["id"].as<int>());
+    txn.commit();
+    return std::nullopt;
+  }
 }
 
 int GameRepository::CreateGame(int user_id, const GameState& state) {

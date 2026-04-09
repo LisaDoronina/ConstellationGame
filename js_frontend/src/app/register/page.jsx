@@ -71,8 +71,8 @@ export default function RegisterPage() {
       return
     }
 
-    if (password.length < 8) {  // Changed from 4 to 8 to match backend requirement
-      setError("Пароль должен быть не менее 8 символов")
+    if (password.length < 6) {
+      setError("Пароль должен быть не короче 6 символов")
       return
     }
 
@@ -208,7 +208,7 @@ export default function RegisterPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Придумайте пароль (мин. 8 символов)..."
+                    placeholder="Придумайте пароль (мин. 6 символов)..."
                     disabled={isLoading}
                     className="w-full bg-transparent border-b-2 border-foreground/30 text-foreground text-4xl py-2 tracking-[0.08em] placeholder:text-zinc-600 focus:outline-none focus:border-foreground transition-colors disabled:opacity-50"
                 />

@@ -253,13 +253,21 @@ function GameContent() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [username, setUsername] = useState("")
+  const [userId, setUserId] = useState(null)
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true"
     const storedUsername = localStorage.getItem("username")
+    const storedUserId = localStorage.getItem("userId")
     setIsLoggedIn(loggedIn)
     if (storedUsername) {
       setUsername(storedUsername)
+    }
+    if (storedUserId) {
+      const parsedUserId = Number(storedUserId)
+      if (Number.isInteger(parsedUserId) && parsedUserId > 0) {
+        setUserId(parsedUserId)
+      }
     }
   }, [])
 
@@ -267,11 +275,16 @@ function GameContent() {
     setRequestError("")
     setGameState(null)
 
+    if (!Number.isInteger(userId) || userId <= 0) {
+      setRequestError("Нужно войти в аккаунт перед началом игры")
+      return
+    }
+
     try {
       const response = await fetch("api/game/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lives }),
+        body: JSON.stringify({ userId, lives }),
       })
 
       const payload = await readResponsePayload(response)
@@ -296,7 +309,7 @@ function GameContent() {
     } catch {
       setRequestError("Бэкенд недоступен")
     }
-  }, [lives, difficulty, inputMethod])
+  }, [userId, lives, difficulty, inputMethod])
 
   useEffect(() => {
     startGame()
@@ -362,7 +375,7 @@ function GameContent() {
         const response = await fetch("api/game/move", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ move: guess }),
+          body: JSON.stringify({ userId, move: guess }),
         })
 
         const payload = await readResponsePayload(response)
@@ -391,7 +404,7 @@ function GameContent() {
         setIsSubmitting(false)
       }
     },
-    [difficulty, gameState, inputMethod, isSubmitting, lives, showFeedback]
+    [difficulty, gameState, inputMethod, isSubmitting, lives, showFeedback, userId]
   )
 
   const handleSubmit = useCallback(
