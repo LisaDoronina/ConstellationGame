@@ -12,7 +12,7 @@ int main() {
   graph.LoadNames("data/names.json");
 
   const std::string DB_CONN =
-    "dbname=mydatabase user=myuser password=mypassword host=localhost port=5432";
+    "dbname=mydatabase user=myuser password=mypassword host=localhost port=5433";
   const std::string conn_env = DB_CONN;
 
 std::string conn =
