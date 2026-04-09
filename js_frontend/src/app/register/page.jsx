@@ -146,7 +146,7 @@ export default function RegisterPage() {
       case "checking":
         return { text: "Проверка...", color: "text-zinc-400" }
       case "available":
-        return { text: "Логин свободен", color: "text-green-500" }
+        return null
       case "taken":
         return { text: "Логин занят", color: "text-red-500" }
       default:

@@ -187,6 +187,13 @@ json GameEngine::GetStateJson() const {
 
   j["path"] = path;
 
+  std::vector<std::string> neighbors;
+  for (int id : graph_.GetNeighbors(state_.current_pos)) {
+    neighbors.push_back(graph_.GetShortName(id));
+  }
+
+  j["neighbors"] = neighbors;
+
   return j;
 }
 

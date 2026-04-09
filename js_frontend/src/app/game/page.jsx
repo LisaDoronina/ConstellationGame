@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, Suspense, useMemo } from "rea
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { allConstellations } from "./constellations-data"
+import shortToFullNames from "./short-to-full-names"
 
 const topRightButtonClass =
   "fixed top-7 right-8 z-50 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white md:top-12 md:right-14 md:text-5xl"
@@ -14,17 +15,33 @@ const topLeftUserClass =
 const bottomRightActionClass =
   "fixed bottom-7 right-8 z-50 whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:bottom-12 md:right-14 md:text-6xl"
 
+function toFullConstellationName(name) {
+  if (typeof name !== "string") return name
+
+  const normalizedName = name.trim()
+  if (!normalizedName) return normalizedName
+
+  const directMatch = shortToFullNames[normalizedName]
+  if (directMatch) return directMatch
+
+  const caseInsensitiveKey = Object.keys(shortToFullNames).find(
+    (key) => key.toUpperCase() === normalizedName.toUpperCase()
+  )
+
+  return caseInsensitiveKey ? shortToFullNames[caseInsensitiveKey] : normalizedName
+}
+
 function ThinkingDots() {
   return (
     <div
-      className="flex w-full items-center justify-center gap-[10px]"
+      className="mx-auto flex w-fit items-center justify-center gap-[10px]"
       aria-label="ИИ думает"
       role="status"
     >
       {[0, 1, 2].map((index) => (
         <span
           key={index}
-          className="block h-4 w-3 rounded-full bg-zinc-300 thinking-dot will-change-transform"
+          className="block h-4 w-4 rounded-full bg-zinc-300 thinking-dot will-change-transform"
           style={{ animationDelay: `${index * 0.2}s` }}
         />
       ))}
@@ -146,7 +163,7 @@ function normalizeGameState(rawState, { initialLives, difficulty, inputMethod, p
         rawState.neighborMoves ??
         rawState.neighbors ??
         []
-    ),
+    ).map(toFullConstellationName),
   }
 }
 
@@ -581,9 +598,9 @@ function GameContent() {
         </p>
       </div>
 
-      <div className="w-24 h-px bg-foreground/20 mb-6 relative z-10" />
+      <div className="relative z-10 mb-6 h-px w-24 self-center bg-foreground/20" />
 
-      <div className="relative z-10 mb-4 flex min-h-[2.5rem] w-full items-center justify-center tracking-[0.1em] text-zinc-300">
+      <div className="relative z-10 mb-4 flex min-h-[2.5rem] w-full items-center justify-center self-center tracking-[0.1em] text-zinc-300">
         {isWaitingForModel || !gameState.isPlayerTurn ? (
           <ThinkingDots />
         ) : (
@@ -630,12 +647,12 @@ function GameContent() {
       {showNeighbors && (
         <div className="mb-8 text-center relative z-10">
           <p className="mb-2 text-2xl tracking-[0.12em] text-zinc-300">Доступные соседи</p>
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-x-4 gap-y-3 px-4">
             {neighborMoves.map((move) => (
               <button
                 key={move}
                 onClick={() => setInput(move)}
-                className={`text-xl transition-colors tracking-[0.1em] ${
+                className={`inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-full px-4 py-2 text-xl leading-none transition-colors tracking-[0.06em] ${
                   gameState.usedConstellations.has(move)
                     ? "text-amber-500/70 hover:text-amber-500"
                     : "text-foreground/70 hover:text-foreground"

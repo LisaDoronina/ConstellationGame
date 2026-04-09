@@ -19,22 +19,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
 // TODO: Заменить на реальные данные с бэкенда
 const mockGameHistory = [
   {
-    id: "game-1",
-    startTime: "2025-03-28T14:30:00",
-    difficulty: "Средний",
-    result: "victory",
-    startConstellation: "Орион",
-    targetConstellation: "Лира",
-    path: ["Орион", "Телец", "Возничий", "Персей", "Андромеда", "Пегас", "Лебедь", "Лира"],
-  },
-  {
-    id: "game-2",
-    startTime: "2025-03-27T19:15:00",
-    difficulty: "Легкий",
-    result: "defeat",
-    startConstellation: "Большая Медведица",
-    targetConstellation: "Скорпион",
-    path: ["Большая Медведица", "Малая Медведица", "Дракон", "Цефей"],
+    id: "placeholder-history-item",
+    startTime: new Date().toISOString(),
+    difficulty: "Скоро тут что-то будет",
+    result: "abandoned",
+    startConstellation: "",
+    targetConstellation: "",
+    path: [],
   },
 ]
 
