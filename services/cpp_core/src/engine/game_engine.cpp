@@ -58,13 +58,16 @@ void GameEngine::ProcessPlayerMove(const std::string& input) {
   int move = graph_.GetIdFromFull(normalized);
 
   if (move == -1) {
-    std::cout << "[PlayerMove] unknown constellation\n";
+    std::cout << "[PlayerMove] unknown constellation -> penalty\n";
+    state_.player_lives--;
+    CheckGameOver();
     return;
   }
 
   if (!ValidateMove(state_.current_pos, move)) {
     std::cout << "[PlayerMove] not a neighbor\n";
     state_.player_lives--;
+    CheckGameOver();
     return;
   }
 
@@ -74,9 +77,8 @@ void GameEngine::ProcessPlayerMove(const std::string& input) {
   } else {
     std::cout << "[PlayerMove] valid move\n";
     ApplyMove(move);
+    state_.player_turn = false;
   }
-
-  state_.player_turn = false;
 
   CheckGameOver();
 }
