@@ -19,49 +19,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
 // TODO: Заменить на реальные данные с бэкенда
 const mockGameHistory = [
   {
-    id: "game-1",
-    startTime: "2025-03-28T14:30:00",
-    difficulty: "Средний",
-    result: "victory",
-    startConstellation: "Орион",
-    targetConstellation: "Лира",
-    path: ["Орион", "Телец", "Возничий", "Персей", "Андромеда", "Пегас", "Лебедь", "Лира"],
-  },
-  {
-    id: "game-2",
-    startTime: "2025-03-27T19:15:00",
-    difficulty: "Легкий",
-    result: "defeat",
-    startConstellation: "Большая Медведица",
-    targetConstellation: "Скорпион",
-    path: ["Большая Медведица", "Малая Медведица", "Дракон", "Цефей"],
-  },
-  {
-    id: "game-3",
-    startTime: "2025-03-26T10:45:00",
-    difficulty: "Сложный",
+    id: "placeholder-history-item",
+    startTime: new Date().toISOString(),
+    difficulty: "Скоро тут что-то будет",
     result: "abandoned",
-    startConstellation: "Кассиопея",
-    targetConstellation: "Центавр",
-    path: ["Кассиопея", "Персей", "Телец"],
-  },
-  {
-    id: "game-4",
-    startTime: "2025-03-25T21:00:00",
-    difficulty: "Средний",
-    result: "victory",
-    startConstellation: "Лебедь",
-    targetConstellation: "Орел",
-    path: ["Лебедь", "Лисичка", "Стрела", "Орел"],
-  },
-  {
-    id: "game-5",
-    startTime: "2025-03-24T16:20:00",
-    difficulty: "Легкий",
-    result: "defeat",
-    startConstellation: "Близнецы",
-    targetConstellation: "Дева",
-    path: ["Близнецы", "Рак", "Лев"],
+    startConstellation: "",
+    targetConstellation: "",
+    path: [],
   },
 ]
 
@@ -193,7 +157,7 @@ export default function ProfilePage() {
       localStorage.removeItem('isLoggedIn')
 
       // Перенаправляем на главную страницу
-      router.push('/')
+      router.push('/login')
     }
   }
 
@@ -227,7 +191,7 @@ export default function ProfilePage() {
             <h1 className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap text-center text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
               История игр
             </h1>
-            <Link href="/" className={topRightButtonClass}>
+            <Link href="/menu" className={topRightButtonClass}>
               К игре
             </Link>
             <div className={topLeftUserClass}>
@@ -242,7 +206,7 @@ export default function ProfilePage() {
                     История игр пуста
                   </p>
                   <Link
-                      href="/"
+                      href="/menu"
                       className="mt-8 text-4xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white"
                   >
                     Начать игру

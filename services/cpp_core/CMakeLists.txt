@@ -35,4 +35,8 @@ target_link_libraries(constellation_game PRIVATE
 
 target_compile_options(constellation_game PRIVATE ${PQXX_CFLAGS_OTHER})
 
+if (WIN32)
+    target_link_libraries(constellation_game PRIVATE ws2_32)
+endif()
+
 file(COPY data DESTINATION ${CMAKE_BINARY_DIR})

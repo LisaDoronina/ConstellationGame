@@ -61,7 +61,7 @@ function ResultContent() {
           <Link href={isLoggedIn ? "/profile" : "/login"} className={`${topLeftUserClass} uppercase tracking-[0.18em] transition-all duration-200 hover:text-white hover:scale-105`}>
             {isLoggedIn ? username : "Вход"}
           </Link>
-          <Link href="/" className={rulesButtonClass}>
+          <Link href="/menu" className={rulesButtonClass}>
             Назад
           </Link>
         </div>
@@ -100,7 +100,7 @@ function ResultContent() {
       </div>
           <div className="absolute bottom-7 right-20 flex justify-end center-right">
             <Link
-              href="/"
+              href="/menu"
               className={actionButtonClass}
             >
               На главную

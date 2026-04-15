@@ -36,6 +36,30 @@ json GameService::MakeMove(int user_id, const std::string& move) {
   engine.LoadState(record.state);
 
   engine.ProcessPlayerMove(move);
+
+  auto state = engine.GetState();
+
+  if (state.game_over) {
+    std::string winner = state.player_lives > 0 ? "player" : "model";
+    repo_.FinishGame(record.game_id, state, winner);
+  } else {
+    repo_.UpdateGame(record.game_id, state);
+  }
+
+  return engine.GetStateJson();
+}
+
+json GameService::MakeModelMove(int user_id) {
+  auto record_opt = repo_.GetLastActiveGame(user_id);
+
+  if (!record_opt.has_value()) {
+    return json{{"error", "no active game"}};
+  }
+
+  auto record = record_opt.value();
+
+  GameEngine engine(graph_);
+  engine.LoadState(record.state);
   engine.ProcessModelMove();
 
   auto state = engine.GetState();

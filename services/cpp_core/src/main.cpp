@@ -11,15 +11,12 @@ int main() {
   graph.LoadFromJson("data/constellations_graph.json");
   graph.LoadNames("data/names.json");
 
-  const char* conn_env = std::getenv("DB_CONN");
+  const std::string DB_CONN =
+    "dbname=mydatabase user=myuser password=mypassword host=localhost port=5433";
+  const std::string conn_env = DB_CONN;
 
-  if (!conn_env) {
-    std::cerr << "DB_CONN not set\n";
-    return 1;
-  }
-
-  std::string conn(conn_env);
-  // std::cout << "DB_CONN=" << conn << std::endl;
+std::string conn =
+    "host=127.0.0.1 port=5433 dbname=mydatabase user=myuser password=mypassword";
   GameRepository repo(conn);
   GameService service(repo, graph);
   HttpServer server(service);

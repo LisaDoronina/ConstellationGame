@@ -14,6 +14,7 @@ class GameService {
 
   json StartGame(int user_id, int lives);
   json MakeMove(int user_id, const std::string& move);
+  json MakeModelMove(int user_id);
 
  private:
   GameRepository& repo_;

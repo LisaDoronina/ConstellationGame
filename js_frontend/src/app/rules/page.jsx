@@ -45,7 +45,7 @@ function RulesContent() {
             Правила</h1>
 
           <Link
-            href={returnTo || "/"}
+            href={returnTo || "/menu"}
             className={topRightButtonClass}
           >
             Назад

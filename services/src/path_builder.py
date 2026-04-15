@@ -68,6 +68,35 @@ def normalize_path(path_items):
     return normalized
 
 
+def parse_path_argument(raw_path):
+    if isinstance(raw_path, list):
+        print(f"[path_builder] path already list: {raw_path}")
+        return raw_path
+
+    if raw_path is None:
+        print("[path_builder] raw path is None")
+        return []
+
+    text = str(raw_path).strip()
+    print(f"[path_builder] raw path argument: {text}")
+    if not text:
+        print("[path_builder] raw path is empty after trim")
+        return []
+
+    try:
+        parsed = json.loads(text)
+        if isinstance(parsed, list):
+            print(f"[path_builder] parsed JSON path: {parsed}")
+            return parsed
+    except json.JSONDecodeError:
+        print("[path_builder] raw path is not valid JSON, trying comma-separated parser")
+        pass
+
+    parsed_items = [item.strip() for item in text.split(",") if item.strip()]
+    print(f"[path_builder] parsed CSV path: {parsed_items}")
+    return parsed_items
+
+
 def fill_segment_to_edge(axis, sra, sdec, color="#00e600", alpha=0.2, zorder=1):
     sra = np.asarray(sra)
     sdec = np.asarray(sdec)
@@ -143,7 +172,7 @@ def plot_wrapped_line(axis, x, y, **kwargs):
                 y_cross = y1 + t * (y2 - y1)
                 seg_x.append(360)
                 seg_y.append(y_cross)
-                axis.plot(seg_x, seg_y, **kwargs)
+                axis.plot(seg_x, seg_y, solid_joinstyle="round", solid_capstyle="round", **kwargs)
                 seg_x = [0, x2]
                 seg_y = [y_cross, y2]
             else:
@@ -151,19 +180,21 @@ def plot_wrapped_line(axis, x, y, **kwargs):
                 y_cross = y1 + t * (y2 - y1)
                 seg_x.append(0)
                 seg_y.append(y_cross)
-                axis.plot(seg_x, seg_y, **kwargs)
+                axis.plot(seg_x, seg_y, solid_joinstyle="round", solid_capstyle="round", **kwargs)
                 seg_x = [360, x2]
                 seg_y = [y_cross, y2]
         else:
             seg_x.append(x2)
             seg_y.append(y2)
 
-    axis.plot(seg_x, seg_y, **kwargs)
+    axis.plot(seg_x, seg_y, solid_joinstyle="round", solid_capstyle="round", **kwargs)
 
 
 def build_path_image(path_items, output_path):
     const, ra, dec = load_boundaries()
     fill_names = normalize_path(path_items)
+    print(f"[path_builder] normalized path: {fill_names}")
+    print(f"[path_builder] output path: {output_path}")
 
     figure, axis = plt.subplots(figsize=(12, 6), facecolor="#090b17")
     centers_ra = []
@@ -229,13 +260,36 @@ def build_path_image(path_items, output_path):
     if centers_ra and centers_dec:
         order = [center_names.index(name) for name in fill_names if name in center_names]
         order = np.array(order)
+        ordered_ra = np.array(centers_ra)[order]
+        ordered_dec = np.array(centers_dec)[order]
+        ordered_names = np.array(center_names, dtype=object)[order]
+
         plot_wrapped_line(
             axis,
-            np.array(centers_ra)[order],
-            np.array(centers_dec)[order],
+            ordered_ra,
+            ordered_dec,
             color="#29d17d",
             linewidth=2.5,
             zorder=10,
+        )
+
+        axis.scatter(
+            [ordered_ra[0]],
+            [ordered_dec[0]],
+            color="#29d17d",
+            s=55,
+            zorder=11,
+        )
+
+        axis.text(
+            ordered_ra[0],
+            ordered_dec[0] + 4,
+            ordered_names[0],
+            color="#29d17d",
+            fontsize=10,
+            ha="center",
+            va="bottom",
+            zorder=12,
         )
 
     axis.set_facecolor("#090b17")
@@ -253,11 +307,16 @@ def build_path_image(path_items, output_path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--path-json", required=True, help="JSON array with path items")
+    parser.add_argument(
+        "--path-json",
+        required=True,
+        help="Path items either as JSON array or as comma-separated string like 'CMA, MON, ORI'",
+    )
     parser.add_argument("--output", required=True, help="Output PNG path")
     args = parser.parse_args()
 
-    path_items = json.loads(args.path_json)
+    path_items = parse_path_argument(args.path_json)
+    print(f"[path_builder] building image for path items: {path_items}")
     build_path_image(path_items, args.output)
 
 

@@ -20,8 +20,16 @@ export async function POST(request) {
     })
   }
 
+  const userId = Number(body?.userId)
+  if (!Number.isInteger(userId) || userId <= 0) {
+    return new Response(JSON.stringify({ error: "userId is required" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    })
+  }
+
   try {
-    return await proxyBackendGameRequest("/game/move", { move })
+    return await proxyBackendGameRequest("/game/move", { user_id: userId, move })
   } catch (error) {
     const details = error instanceof Error ? error.message : String(error)
     return new Response(JSON.stringify({ error: "Backend is unavailable", details }), {

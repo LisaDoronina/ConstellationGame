@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, Suspense, useMemo } from "rea
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { allConstellations } from "./constellations-data"
+import shortToFullNames from "./short-to-full-names"
 
 const topRightButtonClass =
   "fixed top-7 right-8 z-50 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white md:top-12 md:right-14 md:text-5xl"
@@ -13,6 +14,43 @@ const topLeftUserClass =
 
 const bottomRightActionClass =
   "fixed bottom-7 right-8 z-50 whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:bottom-12 md:right-14 md:text-6xl"
+
+function toFullConstellationName(name) {
+  if (typeof name !== "string") return name
+
+  const normalizedName = name.trim()
+  if (!normalizedName) return normalizedName
+
+  const directMatch = shortToFullNames[normalizedName]
+  if (directMatch) return directMatch
+
+  const caseInsensitiveKey = Object.keys(shortToFullNames).find(
+    (key) => key.toUpperCase() === normalizedName.toUpperCase()
+  )
+
+  return caseInsensitiveKey ? shortToFullNames[caseInsensitiveKey] : normalizedName
+}
+
+function ThinkingDots() {
+  return (
+    <div
+      className="mx-auto flex w-fit items-center justify-center gap-[14px]"
+      aria-label="ИИ думает"
+      role="status"
+    >
+      {[0, 1, 2].map((index) => (
+        <span
+          key={index}
+          className="block h-4 w-3 rounded-full bg-zinc-300 will-change-transform"
+          style={{
+            animation: "thinkingBounce 0.9s ease-in-out infinite",
+            animationDelay: `${index * 0.18}s`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
 
 function asArray(value) {
   if (Array.isArray(value)) return value
@@ -128,7 +166,7 @@ function normalizeGameState(rawState, { initialLives, difficulty, inputMethod, p
         rawState.neighborMoves ??
         rawState.neighbors ??
         []
-    ),
+    ).map(toFullConstellationName),
   }
 }
 
@@ -251,15 +289,24 @@ function GameContent() {
   const [checkResult, setCheckResult] = useState(null)
   const [requestError, setRequestError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isWaitingForModel, setIsWaitingForModel] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [username, setUsername] = useState("")
+  const [userId, setUserId] = useState(null)
 
   useEffect(() => {
     const loggedIn = localStorage.getItem("isLoggedIn") === "true"
     const storedUsername = localStorage.getItem("username")
+    const storedUserId = localStorage.getItem("userId")
     setIsLoggedIn(loggedIn)
     if (storedUsername) {
       setUsername(storedUsername)
+    }
+    if (storedUserId) {
+      const parsedUserId = Number(storedUserId)
+      if (Number.isInteger(parsedUserId) && parsedUserId > 0) {
+        setUserId(parsedUserId)
+      }
     }
   }, [])
 
@@ -267,11 +314,16 @@ function GameContent() {
     setRequestError("")
     setGameState(null)
 
+    if (!Number.isInteger(userId) || userId <= 0) {
+      setRequestError("Нужно войти в аккаунт перед началом игры")
+      return
+    }
+
     try {
       const response = await fetch("api/game/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lives }),
+        body: JSON.stringify({ userId, lives }),
       })
 
       const payload = await readResponsePayload(response)
@@ -296,7 +348,7 @@ function GameContent() {
     } catch {
       setRequestError("Бэкенд недоступен")
     }
-  }, [lives, difficulty, inputMethod])
+  }, [userId, lives, difficulty, inputMethod])
 
   useEffect(() => {
     startGame()
@@ -331,6 +383,47 @@ function GameContent() {
     setTimeout(() => setFeedback(null), 400)
   }, [])
 
+  const requestModelMove = useCallback(async (previousState) => {
+    if (!Number.isInteger(userId) || userId <= 0) {
+      setRequestError("Не удалось выполнить ход ИИ")
+      setIsWaitingForModel(false)
+      return
+    }
+
+    try {
+      const response = await fetch("api/game/model-move", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      })
+
+      const payload = await readResponsePayload(response)
+
+      if (!response.ok) {
+        setRequestError(payload?.error || "Не удалось выполнить ход ИИ")
+        return
+      }
+
+      const nextState = normalizeGameState(payload, {
+        initialLives: lives,
+        difficulty,
+        inputMethod,
+        previousState,
+      })
+
+      if (!nextState) {
+        setRequestError("Бэкенд вернул неполное состояние игры")
+        return
+      }
+
+      setGameState(nextState)
+    } catch {
+      setRequestError("Не удалось выполнить ход ИИ")
+    } finally {
+      setIsWaitingForModel(false)
+    }
+  }, [difficulty, inputMethod, lives, userId])
+
   const checkIfUsed = useCallback(() => {
     if (!gameState || !input.trim()) {
       setCheckResult(null)
@@ -357,12 +450,13 @@ function GameContent() {
       setAutocomplete(null)
       setRequestError("")
       setIsSubmitting(true)
+      setIsWaitingForModel(false)
 
       try {
         const response = await fetch("api/game/move", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ move: guess }),
+          body: JSON.stringify({ userId, move: guess }),
         })
 
         const payload = await readResponsePayload(response)
@@ -384,6 +478,11 @@ function GameContent() {
         }
 
         showFeedback("success")
+
+        if (nextState && !nextState.isPlayerTurn && nextState.gameStatus === "playing") {
+          setIsWaitingForModel(true)
+          void requestModelMove(nextState)
+        }
       } catch {
         setRequestError("Не удалось отправить ход")
         showFeedback("error")
@@ -391,7 +490,7 @@ function GameContent() {
         setIsSubmitting(false)
       }
     },
-    [difficulty, gameState, inputMethod, isSubmitting, lives, showFeedback]
+    [difficulty, gameState, inputMethod, isSubmitting, lives, requestModelMove, showFeedback, userId]
   )
 
   const handleSubmit = useCallback(
@@ -493,7 +592,7 @@ function GameContent() {
         </div>
       </div>
 
-      <div className="relative z-10 mb-6 flex flex-col gap-1 text-center">
+      <div className="relative z-10 mb-6 flex w-full max-w-3xl flex-col items-center gap-1 text-center">
         <p className="text-5xl tracking-[0.08em] text-white md:text-6xl text-bold ">
           Текущее созвездие
         </p>
@@ -502,11 +601,16 @@ function GameContent() {
         </p>
       </div>
 
-      <div className="w-24 h-px bg-foreground/20 mb-6 relative z-10" />
-
-      <p className="text-4xl text-zinc-300 mb-4 relative z-10 tracking-[0.1em]">
-        {gameState.isPlayerTurn ? "Ваш ход" : "Ход ИИ..."}
-      </p>
+      <div className="relative z-10 mb-4 flex w-full max-w-3xl flex-col items-center">
+        <div className="mb-6 h-px w-24 bg-foreground/20" />
+        <div className="flex min-h-[2.5rem] items-center justify-center tracking-[0.1em] text-zinc-300">
+          {isWaitingForModel || !gameState.isPlayerTurn ? (
+            <ThinkingDots />
+          ) : (
+            <p className="text-4xl text-center">Ваш ход</p>
+          )}
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="w-full max-w-xl mb-4 relative z-10">
         <div className="relative">
@@ -517,7 +621,7 @@ function GameContent() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Введите созвездие..."
-            disabled={!gameState.isPlayerTurn || gameState.gameStatus !== "playing"}
+            disabled={!gameState.isPlayerTurn || gameState.gameStatus !== "playing" || isWaitingForModel}
             className="relative z-10 w-full bg-transparent border-b-2 border-foreground/30 text-foreground text-left text-4xl py-2 tracking-[0.08em] placeholder:text-zinc-600 focus:outline-none focus:border-foreground transition-colors disabled:opacity-50"
           />
           {autocomplete && autocomplete.toLowerCase() !== input.toLowerCase() && (
@@ -536,7 +640,7 @@ function GameContent() {
 
       <button
         onClick={checkIfUsed}
-        disabled={!input.trim()}
+        disabled={!input.trim() || isWaitingForModel}
         className={`text-4xl mb-6 transition-colors duration-200 relative z-10 tracking-[0.08em] ${
           checkResult === "used" ? "text-amber-500" : "text-zinc-400 hover:text-zinc-300 disabled:opacity-30"
         }`}
@@ -547,12 +651,12 @@ function GameContent() {
       {showNeighbors && (
         <div className="mb-8 text-center relative z-10">
           <p className="mb-2 text-2xl tracking-[0.12em] text-zinc-300">Доступные соседи</p>
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-x-4 gap-y-3 px-4">
             {neighborMoves.map((move) => (
               <button
                 key={move}
                 onClick={() => setInput(move)}
-                className={`text-xl transition-colors tracking-[0.1em] ${
+                className={`inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-full px-4 py-2 text-xl leading-none transition-colors tracking-[0.06em] ${
                   gameState.usedConstellations.has(move)
                     ? "text-amber-500/70 hover:text-amber-500"
                     : "text-foreground/70 hover:text-foreground"
@@ -599,6 +703,20 @@ function GameContent() {
       >
         Завершить
       </button>
+
+      <style jsx global>{`
+        @keyframes thinkingBounce {
+          0%,
+          60%,
+          100% {
+            transform: translateY(0);
+          }
+
+          30% {
+            transform: translateY(-12px);
+          }
+        }
+      `}</style>
     </main>
   )
 }
