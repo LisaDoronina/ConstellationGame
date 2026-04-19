@@ -7,16 +7,14 @@ public class AuthResponse {
   private String type;
   private Long id;
   private String username;
-  private List<Long> gameIds;
 
   public AuthResponse() {}
 
-  public AuthResponse(String token, String type, Long id, String username, List<Long> gameIds) {
+  public AuthResponse(String token, String type, Long id, String username) {
     this.token = token;
     this.type = type;
     this.id = id;
     this.username = username;
-    this.gameIds = gameIds;
   }
 
   public String getToken() { return token; }
@@ -31,6 +29,4 @@ public class AuthResponse {
   public String getUsername() { return username; }
   public void setUsername(String username) { this.username = username; }
 
-  public List<Long> getGameIds() { return gameIds; }
-  public void setGameIds(List<Long> gameIds) { this.gameIds = gameIds; }
 }

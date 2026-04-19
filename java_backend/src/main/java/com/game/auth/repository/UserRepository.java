@@ -55,7 +55,4 @@ public class UserRepository {
     jpaRepository.deleteById(id);
   }
 
-  public boolean hasGame(String username, Long gameId) {
-    return jpaRepository.hasGame(username, gameId);
-  }
 }

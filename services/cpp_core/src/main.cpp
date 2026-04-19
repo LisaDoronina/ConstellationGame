@@ -12,11 +12,11 @@ int main() {
   graph.LoadNames("data/names.json");
 
   const std::string DB_CONN =
-    "dbname=mydatabase user=myuser password=mypassword host=localhost port=5433";
+    "dbname=mydatabase user=myuser password=mypassword host=localhost port=5432";
   const std::string conn_env = DB_CONN;
 
 std::string conn =
-    "host=127.0.0.1 port=5433 dbname=mydatabase user=myuser password=mypassword";
+    "host=127.0.0.1 port=5432 dbname=mydatabase user=myuser password=mypassword";
   GameRepository repo(conn);
   GameService service(repo, graph);
   HttpServer server(service);
