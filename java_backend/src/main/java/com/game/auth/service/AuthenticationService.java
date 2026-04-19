@@ -37,7 +37,6 @@ public class AuthenticationService {
     User user = new User();
     user.setUsername(request.getUsername());
     user.setPasswordHash(passwordHash);
-    user.setGameIds(new ArrayList<>());
 
     User savedUser = userRepository.save(user);
     System.out.println("[AuthenticationService] User registered successfully: " + savedUser.getUsername());
@@ -64,13 +63,13 @@ public class AuthenticationService {
     tokenStore.put(token, user.getUsername());
 
     System.out.println("[AuthenticationService] User logged in successfully: " + user.getUsername());
+    System.out.println("[Authentification service] " + token);
 
     AuthResponse response = new AuthResponse();
     response.setToken(token);
     response.setType("Bearer");
     response.setId(user.getId());
     response.setUsername(user.getUsername());
-    response.setGameIds(user.getGameIds());
 
     return response;
   }
@@ -105,30 +104,5 @@ public class AuthenticationService {
       token = token.substring(7);
     }
     return tokenStore.containsKey(token);
-  }
-
-  public void addGameToUser(Long userId, Long gameId) {
-    User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-
-    user.addGame(gameId);
-    userRepository.save(user);
-    System.out.println("[AuthenticationService] Game " + gameId + " added to user " + user.getUsername());
-  }
-
-  public void removeGameFromUser(Long userId, Long gameId) {
-    User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-
-    user.removeGame(gameId);
-    userRepository.save(user);
-    System.out.println("[AuthenticationService] Game " + gameId + " removed from user " + user.getUsername());
-  }
-
-  public List<Long> getUserGames(Long userId) {
-    User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found"));
-
-    return user.getGameIds();
   }
 }

@@ -73,69 +73,6 @@ public class AuthController {
       Map<String, Object> response = new HashMap<>();
       response.put("id", user.getId());
       response.put("username", user.getUsername());
-      response.put("gameIds", user.getGameIds());
-
-      return ResponseEntity.ok(response);
-    } catch (RuntimeException e) {
-      Map<String, String> error = new HashMap<>();
-      error.put("error", e.getMessage());
-      return ResponseEntity.status(401).body(error);
-    }
-  }
-
-  @PostMapping("/games/{gameId}")
-  public ResponseEntity<?> addGameToUser(
-          @RequestHeader("Authorization") String authHeader,
-          @PathVariable Long gameId) {
-    try {
-      User user = authService.getCurrentUser(authHeader);
-      authService.addGameToUser(user.getId(), gameId);
-
-      Map<String, Object> response = new HashMap<>();
-      response.put("message", "Game added successfully");
-      response.put("gameId", gameId);
-      response.put("userGames", authService.getUserGames(user.getId()));
-
-      return ResponseEntity.ok(response);
-    } catch (RuntimeException e) {
-      Map<String, String> error = new HashMap<>();
-      error.put("error", e.getMessage());
-      return ResponseEntity.badRequest().body(error);
-    }
-  }
-
-  @DeleteMapping("/games/{gameId}")
-  public ResponseEntity<?> removeGameFromUser(
-          @RequestHeader("Authorization") String authHeader,
-          @PathVariable Long gameId) {
-    try {
-      User user = authService.getCurrentUser(authHeader);
-      authService.removeGameFromUser(user.getId(), gameId);
-
-      Map<String, Object> response = new HashMap<>();
-      response.put("message", "Game removed successfully");
-      response.put("gameId", gameId);
-      response.put("userGames", authService.getUserGames(user.getId()));
-
-      return ResponseEntity.ok(response);
-    } catch (RuntimeException e) {
-      Map<String, String> error = new HashMap<>();
-      error.put("error", e.getMessage());
-      return ResponseEntity.badRequest().body(error);
-    }
-  }
-
-  @GetMapping("/games")
-  public ResponseEntity<?> getUserGames(@RequestHeader("Authorization") String authHeader) {
-    try {
-      User user = authService.getCurrentUser(authHeader);
-      List<Long> games = authService.getUserGames(user.getId());
-
-      Map<String, Object> response = new HashMap<>();
-      response.put("userId", user.getId());
-      response.put("username", user.getUsername());
-      response.put("games", games);
-      response.put("count", games.size());
 
       return ResponseEntity.ok(response);
     } catch (RuntimeException e) {
