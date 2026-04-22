@@ -84,46 +84,56 @@ void GameEngine::ProcessPlayerMove(const std::string& input) {
 }
 
 void GameEngine::ProcessModelMove() {
-  if (state_.player_turn || state_.game_over) {
-    std::cout << "[ModelMove] skipped\n";
-    return;
-  }
+  int cur = state_.current_pos;
+  int end = state_.finish;
 
-  auto neighbor_ids = graph_.GetNeighbors(state_.current_pos);
+  std::cout << "[ModelMove] cur=" << graph_.GetFullName(cur)
+            << " end=" << graph_.GetFullName(end) << std::endl;
+
+  auto neighbors = graph_.GetNeighbors(cur);
 
   std::vector<std::string> moves;
-  for (int id : neighbor_ids) moves.push_back(graph_.GetShortName(id));
+  for (int v : neighbors) {
+    moves.push_back(graph_.GetShortName(v));
+  }
 
   std::vector<std::string> path;
-  for (int id : state_.path) path.push_back(graph_.GetShortName(id));
+  for (int v : state_.path) {
+    path.push_back(graph_.GetShortName(v));
+  }
 
-  std::string cur = graph_.GetShortName(state_.current_pos);
-  std::string end = graph_.GetShortName(state_.finish);
-
-  std::cout << "[ModelMove] cur=" << cur << " end=" << end << std::endl;
-
-  std::string answer = model_.GetMove(cur, end, path, moves);
+  std::string answer = model_.GetMove(graph_.GetShortName(cur),
+                                      graph_.GetShortName(end), path, moves);
 
   std::cout << "[ModelMove] raw answer=" << answer << std::endl;
 
-  answer.erase(remove_if(answer.begin(), answer.end(), isspace), answer.end());
-
-  std::cout << "[ModelMove] cleaned answer=" << answer << std::endl;
-
   int move = graph_.GetId(answer);
 
-  if (move == -1 || !ValidateMove(state_.current_pos, move)) {
-    std::cout << "[ModelMove] invalid move -> penalty\n";
+  if (move == -1) {
+    std::cout << "[ModelMove] invalid code -> penalty\n";
     state_.model_lives--;
-  } else if (state_.visited.count(move)) {
-    std::cout << "[ModelMove] repeated -> penalty\n";
+    state_.player_turn = true;
+    CheckGameOver();
+    return;
+  }
+
+  if (!ValidateMove(state_.current_pos, move)) {
+    std::cout << "[ModelMove] not a neighbor\n";
     state_.model_lives--;
+    state_.player_turn = true;
+    CheckGameOver();
+    return;
+  }
+
+  if (state_.visited.count(move)) {
+    std::cout << "[ModelMove] already visited -> penalty\n";
+    state_.model_lives--;
+    state_.player_turn = true;
   } else {
     std::cout << "[ModelMove] valid move\n";
     ApplyMove(move);
+    state_.player_turn = true;
   }
-
-  state_.player_turn = true;
 
   CheckGameOver();
 }
