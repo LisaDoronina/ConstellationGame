@@ -121,7 +121,7 @@ function normalizeGameState(rawState, { initialLives, difficulty, inputMethod, p
         ? "won"
         : "lost"
       : null) ??
-    previousState?.gameStatus ?? // vggyvhbuh
+    previousState?.gameStatus ?? // vggyv
     "playing"
 
   const endReason =
