@@ -1,3 +1,5 @@
+import random
+
 import requests
 import python_ml.resources.graph as graph
 import python_ml.src.config as cfg
@@ -119,5 +121,8 @@ class ModelService:
         prompt = self.create_prompt(cur_state, end_state, available_moves)
         raw_response = self.send_request(prompt)
         response = self.parse_response(raw_response)
+        if response == "No response received":
+            rand_ind = random.randint(0, len(available_moves) - 1)
+            print("[Model Service] Random move:", available_moves[rand_ind])
+            return available_moves[rand_ind]
         return response
-
