@@ -97,13 +97,11 @@ function normalizeGameState(rawState, { initialLives, difficulty, inputMethod, p
   usedConstellations.add(startConstellation)
   usedConstellations.add(currentConstellation)
 
-  const movesFromState = Array.isArray(rawState.moves) ? rawState.moves : previousState?.moves ?? []
-  const moves =
-    movesFromState.length > 0
-      ? movesFromState
-      : asArray(rawState.path)
-          .slice(1)
-          .map((constellation) => ({ player: "unknown", constellation }))
+  const moves = Array.isArray(rawState.moves)
+    ? rawState.moves
+    : asArray(rawState.path)
+        .slice(1)
+        .map((constellation) => ({ player: "unknown", constellation }))
 
   const lives = Number(
     rawState.lives ??

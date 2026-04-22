@@ -319,6 +319,5 @@ def main():
     print(f"[path_builder] building image for path items: {path_items}")
     build_path_image(path_items, args.output)
 
-
 if __name__ == "__main__":
     main()
