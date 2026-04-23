@@ -18,7 +18,8 @@ public class GameService {
   private GameRepository gameRepository;
 
   public List<GameInfoDTO> getRecentGames(Long userId, int limit) {
-    List<Game> games = gameRepository.findTop5ByUserIdOrderByIdDesc(userId);
+    Pageable pageable = PageRequest.of(0, limit);
+    List<Game> games = gameRepository.findByUserIdOrderByIdDesc(userId, pageable);
     return games.stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());

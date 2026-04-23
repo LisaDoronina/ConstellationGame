@@ -27,7 +27,7 @@ public class GameController {
   public ResponseEntity<?> getRecentGames(@RequestHeader("Authorization") String authHeader) {
     try {
       User user = authService.getCurrentUser(authHeader);
-      List<GameInfoDTO> games = gameService.getRecentGames(user.getId(), 5);
+      List<GameInfoDTO> games = gameService.getRecentGames(user.getId(), 10);
 
       Map<String, Object> response = new HashMap<>();
       response.put("games", games);

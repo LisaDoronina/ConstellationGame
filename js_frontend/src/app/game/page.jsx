@@ -690,13 +690,6 @@ function GameContent() {
         </div>
       )}
 
-      {gameState.difficulty === "hard" && (
-        <div className="mb-8 text-center relative z-10">
-          <p className="text-lg text-muted-foreground/60 tracking-[0.15em]">
-            ИИ играет с максимальной точностью
-          </p>
-        </div>
-      )}
 
       <div className="fixed bottom-7 left-8 z-50 flex flex-col items-start md:bottom-12 md:left-14">
         <p className="text-base text-muted-foreground/60 mb-1 uppercase tracking-[0.15em]">

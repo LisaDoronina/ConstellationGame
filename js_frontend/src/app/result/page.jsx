@@ -33,6 +33,8 @@ function ResultContent() {
   const start = searchParams.get("start") || "—"
   const target = searchParams.get("target") || "—"
   const rawPath = searchParams.get("path")
+  const from = searchParams.get("from")
+  const backHref = from === "profile" ? "/profile" : "/menu"
 
   let path = []
   try {
@@ -42,7 +44,7 @@ function ResultContent() {
   }
 
   const imageUrl =
-    path.length > 0 ? `/api/path-image?path=${encodeURIComponent(JSON.stringify(path))}` : null
+    path.length > 0 ? `/api/path-image?path=${encodeURIComponent(JSON.stringify(path))}&target=${encodeURIComponent(target)}` : null
 
   return (
     <main className="relative isolate min-h-screen w-full bg-background py-7 md:py-12  overflow-x-hidden">
@@ -61,7 +63,7 @@ function ResultContent() {
           <Link href={isLoggedIn ? "/profile" : "/login"} className={`${topLeftUserClass} uppercase tracking-[0.18em] transition-all duration-200 hover:text-white hover:scale-105`}>
             {isLoggedIn ? username : "Вход"}
           </Link>
-          <Link href="/menu" className={rulesButtonClass}>
+          <Link href={backHref} className={rulesButtonClass}>
             Назад
           </Link>
         </div>
@@ -98,7 +100,7 @@ function ResultContent() {
 
 
       </div>
-          <div className="absolute bottom-7 right-20 flex justify-end center-right">
+          <div className="mt-10 pb-7 flex justify-end px-16 md:px-28">
             <Link
               href="/menu"
               className={actionButtonClass}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useMemo } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { allConstellations } from "../game/constellations-data"
@@ -15,7 +15,6 @@ const logoutButtonClass =
     "fixed bottom-7 left-8 z-50 text-left text-3xl uppercase tracking-[0.14em] text-zinc-500 transition-all duration-200 hover:text-red-400 hover:scale-105 md:bottom-12 md:left-14 md:text-4xl"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
-const PAGE_SIZE = 10
 
 function buildIdToNameMap() {
   const sorted = [...allConstellations].sort((a, b) => a.localeCompare(b, "ru"))
@@ -82,18 +81,17 @@ function GameHistoryItem({ game, onClick }) {
           className="group w-full text-left transition-transform duration-200 hover:scale-[1.03] focus:outline-none"
       >
         <div className="flex flex-col gap-1 py-4 border-b border-foreground/10 overflow-hidden">
-          <div className="flex items-baseline gap-4 min-w-0">
-            <p className="text-4xl tracking-[0.08em] text-white transition-transform duration-200 group-hover:scale-[1.02] origin-left truncate min-w-0">
-              {startName} → {finishName}
-            </p>
-            <p className={`text-3xl tracking-[0.08em] ${resultColor} transition-transform duration-200 group-hover:scale-[1.02] shrink-0 ml-auto`}>
+          <p className="text-4xl tracking-[0.08em] text-white transition-transform duration-200 group-hover:scale-[1.02] origin-left truncate min-w-0">
+            {startName} → {finishName}
+          </p>
+          <div className="flex items-baseline gap-10 min-w-0">
+            <p className={`text-3xl tracking-[0.08em] ${resultColor}`}>
               {resultText}
             </p>
+            <p className="text-2xl tracking-[0.08em] text-zinc-600">
+              {pathNames.length > 0 ? `${pathNames.length} ход.` : ""}
+            </p>
           </div>
-          <p className="text-2xl tracking-[0.08em] text-zinc-600">
-            {pathNames.length > 0 ? `${pathNames.length} ход.` : ""}
-            {game.id ? ` #${game.id}` : ""}
-          </p>
         </div>
       </button>
   )
@@ -104,19 +102,16 @@ export default function ProfilePage() {
   const [username, setUsername] = useState("")
   const [gameHistory, setGameHistory] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
-  const [page, setPage] = useState(0)
-  const [hasMore, setHasMore] = useState(true)
   const [error, setError] = useState(null)
 
-  const fetchGames = useCallback(async (pageNum, append = false) => {
+  const fetchGames = useCallback(async () => {
     const token = localStorage.getItem('authToken')
     if (!token) return
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/games?page=${pageNum}&size=${PAGE_SIZE}`,
+        `${API_BASE_URL}/api/games/recent`,
         { headers: { 'Authorization': `Bearer ${token}` } }
       )
 
@@ -134,8 +129,7 @@ export default function ProfilePage() {
       const data = await response.json()
       const games = data.games || []
 
-      setGameHistory(prev => append ? [...prev, ...games] : games)
-      setHasMore(games.length === PAGE_SIZE)
+      setGameHistory(games)
       setError(null)
     } catch (err) {
       console.error('Error fetching game history:', err)
@@ -154,16 +148,8 @@ export default function ProfilePage() {
 
     setUsername(storedUsername)
 
-    fetchGames(0).finally(() => setIsLoading(false))
+    fetchGames().finally(() => setIsLoading(false))
   }, [router, fetchGames])
-
-  const handleLoadMore = async () => {
-    const nextPage = page + 1
-    setIsLoadingMore(true)
-    await fetchGames(nextPage, true)
-    setPage(nextPage)
-    setIsLoadingMore(false)
-  }
 
   const handleGameClick = (game) => {
     const { pathNames, startName, finishName } = parseGameState(game.path)
@@ -175,6 +161,7 @@ export default function ProfilePage() {
       start: startName,
       target: finishName,
       path: JSON.stringify(pathNames),
+      from: "profile",
     })
     router.push(`/result?${params.toString()}`)
   }
@@ -238,9 +225,11 @@ export default function ProfilePage() {
             <h1 className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap text-center text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
               История игр
             </h1>
-            <Link href="/menu" className={topRightButtonClass}>
-              К игре
-            </Link>
+            {gameHistory.length > 0 && (
+              <Link href="/menu" className={topRightButtonClass}>
+                К игре
+              </Link>
+            )}
             <div className={topLeftUserClass}>
               {username}
             </div>
@@ -253,7 +242,7 @@ export default function ProfilePage() {
                     {error}
                   </p>
                   <button
-                      onClick={() => { setIsLoading(true); setError(null); fetchGames(0).finally(() => setIsLoading(false)) }}
+                      onClick={() => { setIsLoading(true); setError(null); fetchGames().finally(() => setIsLoading(false)) }}
                       className="mt-8 text-4xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white"
                   >
                     Повторить
@@ -280,15 +269,7 @@ export default function ProfilePage() {
                           onClick={() => handleGameClick(game)}
                       />
                   ))}
-                  {hasMore && (
-                      <button
-                          onClick={handleLoadMore}
-                          disabled={isLoadingMore}
-                          className="mt-6 self-center text-3xl uppercase tracking-[0.14em] text-zinc-400 transition-all duration-200 hover:text-white hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isLoadingMore ? "Загрузка..." : "Загрузить ещё"}
-                      </button>
-                  )}
+
                 </div>
             )}
           </div>
