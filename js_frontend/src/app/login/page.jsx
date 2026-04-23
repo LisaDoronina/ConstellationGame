@@ -88,9 +88,6 @@ export default function LoginPage() {
             <h1 className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap text-center text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
               Вход
             </h1>
-            <div className={topLeftUserClass}>
-              Вход
-            </div>
           </div>
 
           <div className="flex flex-1 flex-col items-center justify-center">

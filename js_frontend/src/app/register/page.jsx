@@ -144,7 +144,7 @@ export default function RegisterPage() {
   const getUsernameStatusText = () => {
     switch (usernameStatus) {
       case "checking":
-        return { text: "Проверка...", color: "text-zinc-400" }
+        return null
       case "available":
         return null
       case "taken":
@@ -174,12 +174,9 @@ export default function RegisterPage() {
             <Link href="/login" className={topRightButtonClass}>
               Назад
             </Link>
-            <div className={topLeftUserClass}>
-              Вход
-            </div>
           </div>
 
-          <div className="flex flex-1 flex-col items-center justify-center">
+          <div className="flex flex-1 flex-col items-center justify-center py-25">
             <form onSubmit={handleSubmit} className="flex w-full max-w-xl flex-col gap-8">
               <div className="flex flex-col gap-2">
                 <label className="text-4xl tracking-[0.08em] text-white">
