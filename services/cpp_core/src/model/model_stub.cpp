@@ -40,7 +40,14 @@ std::string ModelService::GetMove(const std::string& cur,
 
   std::string answer = response["answer"];
 
+  if (answer.empty()) {
+    std::cout << "[ModelService] empty answer\n";
+    return "";
+  }
+
   std::cout << "[ModelService] answer=" << answer << std::endl;
+  std::cout << "[ModelService] EXPECT CODE LIKE Dor, GOT=" << answer
+            << std::endl;
 
   return answer;
 }
