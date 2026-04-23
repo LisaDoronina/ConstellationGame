@@ -255,7 +255,7 @@ export default function ProfilePage() {
                   </p>
                   <Link
                       href="/menu"
-                      className="mt-8 text-4xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white"
+                      className="mt-8 text-6xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white"
                   >
                     Начать игру
                   </Link>
