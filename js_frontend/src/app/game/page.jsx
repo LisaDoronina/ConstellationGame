@@ -112,16 +112,27 @@ function normalizeGameState(rawState, { initialLives, difficulty, inputMethod, p
   )
   const maxLives = Number(rawState.maxLives ?? rawState.max_lives ?? previousState?.maxLives ?? initialLives)
 
+  // Determine game outcome when game_over is true:
+  // - Reached finish: last mover wins (player_turn flipped after move)
+  // - Lives ran out: whoever has 0 lives loses
+  // - Deadlock: whoever's turn it is (must move but can't) loses
+  const playerTurn = rawState.player_turn ?? rawState.isPlayerTurn
   const gameStatus =
     rawState.gameStatus ??
     rawState.status ??
     rawState.result ??
     (rawState.game_over
-      ? currentConstellation === targetConstellation || Number(rawState.model_lives) <= 0
+      ? currentConstellation === targetConstellation
+        ? (playerTurn === false ? "won" : "lost")  // player_turn=false means player just moved to finish, true means model did
+        : Number(rawState.model_lives) <= 0
         ? "won"
-        : "lost"
+        : Number(rawState.player_lives) <= 0
+        ? "lost"
+        : playerTurn === true
+        ? "lost"   // deadlock: player's turn but can't move -> player loses
+        : "won"    // deadlock: model's turn but can't move -> player wins
       : null) ??
-    previousState?.gameStatus ?? // vg
+    previousState?.gameStatus ??
     "playing"
 
   const endReason =
@@ -134,7 +145,7 @@ function normalizeGameState(rawState, { initialLives, difficulty, inputMethod, p
         ? "Закончились жизни"
         : Number(rawState.model_lives) <= 0
         ? "У ИИ закончились жизни"
-        : "Игра завершена"
+        : "Нет доступных ходов"
       : "") ??
     previousState?.endReason ??
     ""
@@ -503,14 +514,28 @@ function GameContent() {
     setInput(name)
   }, [])
 
-  const handleEndGame = useCallback(() => {
-    if (gameState) {
-      setGameState((prev) => prev ? {
-        ...prev,
-        gameStatus: "lost",
-        endReason: "Игра завершена досрочно",
-      } : null)
+  const handleEndGame = useCallback(async () => {
+    if (!gameState || gameState.gameStatus !== "playing") return
+
+    // Call Java backend to mark game as finished/lost in DB
+    const token = localStorage.getItem('authToken')
+    if (token) {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
+      try {
+        await fetch(`${apiBaseUrl}/api/games/abort`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      } catch (err) {
+        console.error('Failed to abort game on backend:', err)
+      }
     }
+
+    setGameState((prev) => prev ? {
+      ...prev,
+      gameStatus: "lost",
+      endReason: "Игра завершена досрочно",
+    } : null)
   }, [gameState])
 
   useEffect(() => {
@@ -548,7 +573,7 @@ function GameContent() {
 
   return (
     <main
-      className={`relative isolate min-h-screen bg-background flex flex-col items-center justify-center px-8 py-7 transition-colors duration-300 md:px-14 md:py-12 ${
+      className={`relative isolate h-screen bg-background flex flex-col items-center justify-center px-8 py-7 transition-colors duration-300 md:px-14 md:py-12 overflow-hidden ${
         feedback === "success" ? "bg-green-950/30" : feedback === "error" ? "bg-red-950/30" : ""
       }`}
     >

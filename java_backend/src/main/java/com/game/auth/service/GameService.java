@@ -24,6 +24,18 @@ public class GameService {
             .collect(Collectors.toList());
   }
 
+  public boolean abortActiveGame(Long userId) {
+    List<Game> activeGames = gameRepository.findByUserIdAndFinishedFalseOrderByIdDesc(userId);
+    if (activeGames.isEmpty()) return false;
+
+    for (Game game : activeGames) {
+      game.setFinished(true);
+      game.setWinner("model");
+      gameRepository.save(game);
+    }
+    return true;
+  }
+
   public List<GameInfoDTO> getUserGamesPaginated(Long userId, int page, int size) {
     Pageable pageable = PageRequest.of(page, size);
     List<Game> games = gameRepository.findByUserIdOrderByIdDesc(userId, pageable);
