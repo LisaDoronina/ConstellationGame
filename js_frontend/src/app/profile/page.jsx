@@ -17,9 +17,6 @@ const logoutButtonClass =
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
 const PAGE_SIZE = 10
 
-// The C++ backend stores constellation IDs as integers.
-// nlohmann::json sorts object keys alphabetically (via std::map),
-// so the ID assignment matches alphabetical sort of Russian names.
 function buildIdToNameMap() {
   const sorted = [...allConstellations].sort((a, b) => a.localeCompare(b, "ru"))
   const map = {}
@@ -29,9 +26,6 @@ function buildIdToNameMap() {
 
 const ID_TO_NAME = buildIdToNameMap()
 
-// The DB "path" column stores the full serialized GameState JSON:
-// {"start":42,"finish":17,"current_pos":5,"path":[42,5,12],...}
-// We need to parse it and extract start, finish, and path (converting IDs to names).
 function parseGameState(pathStr) {
   try {
     const state = JSON.parse(pathStr)

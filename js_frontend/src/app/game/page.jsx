@@ -112,10 +112,6 @@ function normalizeGameState(rawState, { initialLives, difficulty, inputMethod, p
   )
   const maxLives = Number(rawState.maxLives ?? rawState.max_lives ?? previousState?.maxLives ?? initialLives)
 
-  // Determine game outcome when game_over is true:
-  // - Reached finish: last mover wins (player_turn flipped after move)
-  // - Lives ran out: whoever has 0 lives loses
-  // - Deadlock: whoever's turn it is (must move but can't) loses
   const playerTurn = rawState.player_turn ?? rawState.isPlayerTurn
   const gameStatus =
     rawState.gameStatus ??
@@ -123,14 +119,14 @@ function normalizeGameState(rawState, { initialLives, difficulty, inputMethod, p
     rawState.result ??
     (rawState.game_over
       ? currentConstellation === targetConstellation
-        ? (playerTurn === false ? "won" : "lost")  // player_turn=false means player just moved to finish, true means model did
+        ? (playerTurn === false ? "won" : "lost")
         : Number(rawState.model_lives) <= 0
         ? "won"
         : Number(rawState.player_lives) <= 0
         ? "lost"
         : playerTurn === true
-        ? "lost"   // deadlock: player's turn but can't move -> player loses
-        : "won"    // deadlock: model's turn but can't move -> player wins
+        ? "lost"
+        : "won"
       : null) ??
     previousState?.gameStatus ??
     "playing"
@@ -190,7 +186,6 @@ async function readResponsePayload(response) {
   }
 }
 
-// Grid-based constellation background - avoids overlapping and excluded zones
 function ConstellationBackground({
   usedConstellations,
   onSelect,
