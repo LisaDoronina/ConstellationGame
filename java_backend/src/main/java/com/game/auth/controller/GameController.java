@@ -40,27 +40,4 @@ public class GameController {
       return ResponseEntity.status(401).body(error);
     }
   }
-
-  @GetMapping
-  public ResponseEntity<?> getAllGames(
-          @RequestHeader("Authorization") String authHeader,
-          @RequestParam(defaultValue = "0") int page,
-          @RequestParam(defaultValue = "10") int size) {
-    try {
-      User user = authService.getCurrentUser(authHeader);
-      List<GameInfoDTO> games = gameService.getUserGamesPaginated(user.getId(), page, size);
-
-      Map<String, Object> response = new HashMap<>();
-      response.put("games", games);
-      response.put("page", page);
-      response.put("size", size);
-      response.put("count", games.size());
-
-      return ResponseEntity.ok(response);
-    } catch (RuntimeException e) {
-      Map<String, String> error = new HashMap<>();
-      error.put("error", e.getMessage());
-      return ResponseEntity.status(401).body(error);
-    }
-  }
 }

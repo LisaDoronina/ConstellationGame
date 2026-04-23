@@ -24,14 +24,6 @@ public class GameService {
             .collect(Collectors.toList());
   }
 
-  public List<GameInfoDTO> getUserGamesPaginated(Long userId, int page, int size) {
-    Pageable pageable = PageRequest.of(page, size);
-    List<Game> games = gameRepository.findByUserIdOrderByIdDesc(userId, pageable);
-    return games.stream()
-            .map(this::convertToDTO)
-            .collect(Collectors.toList());
-  }
-
   private GameInfoDTO convertToDTO(Game game) {
     return new GameInfoDTO(
             game.getId(),
