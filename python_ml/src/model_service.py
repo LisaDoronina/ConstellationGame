@@ -118,11 +118,22 @@ class ModelService:
     def get_answer(self, cur_state, end_state, path, available_moves):
         available_moves = self.validate_available_moves(path, available_moves)
         print(path, available_moves)
+
+        if not available_moves:
+            print("[Model Service] No available moves")
+            return ""
+
         prompt = self.create_prompt(cur_state, end_state, available_moves)
         raw_response = self.send_request(prompt)
         response = self.parse_response(raw_response)
-        if response == "No response received":
+
+        cleaned = response.strip().replace(" ", "") if response else ""
+
+        if response == "No response received" or cleaned not in available_moves:
+            if cleaned not in available_moves and response != "No response received":
+                print(f"[Model Service] Invalid format: '{response}' not in {available_moves}")
             rand_ind = random.randint(0, len(available_moves) - 1)
             print("[Model Service] Random move:", available_moves[rand_ind])
             return available_moves[rand_ind]
-        return response
+
+        return cleaned

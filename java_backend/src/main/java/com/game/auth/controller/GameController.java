@@ -27,12 +27,28 @@ public class GameController {
   public ResponseEntity<?> getRecentGames(@RequestHeader("Authorization") String authHeader) {
     try {
       User user = authService.getCurrentUser(authHeader);
-      List<GameInfoDTO> games = gameService.getRecentGames(user.getId(), 5);
+      List<GameInfoDTO> games = gameService.getRecentGames(user.getId(), 10);
 
       Map<String, Object> response = new HashMap<>();
       response.put("games", games);
       response.put("count", games.size());
 
+      return ResponseEntity.ok(response);
+    } catch (RuntimeException e) {
+      Map<String, String> error = new HashMap<>();
+      error.put("error", e.getMessage());
+      return ResponseEntity.status(401).body(error);
+    }
+  }
+
+  @PostMapping("/abort")
+  public ResponseEntity<?> abortGame(@RequestHeader("Authorization") String authHeader) {
+    try {
+      User user = authService.getCurrentUser(authHeader);
+      boolean aborted = gameService.abortActiveGame(user.getId());
+
+      Map<String, Object> response = new HashMap<>();
+      response.put("aborted", aborted);
       return ResponseEntity.ok(response);
     } catch (RuntimeException e) {
       Map<String, String> error = new HashMap<>();

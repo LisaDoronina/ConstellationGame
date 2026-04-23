@@ -10,4 +10,6 @@ public interface GameRepository extends JpaRepository<Game, Long> {
   List<Game> findTop5ByUserIdOrderByIdDesc(Long userId);
 
   List<Game> findByUserIdOrderByIdDesc(Long userId, Pageable pageable);
+
+  List<Game> findByUserIdAndFinishedFalseOrderByIdDesc(Long userId);
 }

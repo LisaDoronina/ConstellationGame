@@ -3,6 +3,17 @@
 GameService::GameService(GameRepository& repo, ConstellationGraph& graph)
     : repo_(repo), graph_(graph) {}
 
+static std::string DetermineWinner(const GameState& state) {
+  if (state.current_pos == state.finish) {
+    return state.player_turn ? "model" : "player";
+  }
+
+  if (state.player_lives <= 0) return "model";
+  if (state.model_lives <= 0) return "player";
+
+  return state.player_turn ? "model" : "player";
+}
+
 json GameService::StartGame(int user_id, int lives) {
   auto existing = repo_.GetLastActiveGame(user_id);
 
@@ -40,7 +51,7 @@ json GameService::MakeMove(int user_id, const std::string& move) {
   auto state = engine.GetState();
 
   if (state.game_over) {
-    std::string winner = state.player_lives > 0 ? "player" : "model";
+    std::string winner = DetermineWinner(state);
     repo_.FinishGame(record.game_id, state, winner);
   } else {
     repo_.UpdateGame(record.game_id, state);
@@ -65,7 +76,7 @@ json GameService::MakeModelMove(int user_id) {
   auto state = engine.GetState();
 
   if (state.game_over) {
-    std::string winner = state.player_lives > 0 ? "player" : "model";
+    std::string winner = DetermineWinner(state);
     repo_.FinishGame(record.game_id, state, winner);
   } else {
     repo_.UpdateGame(record.game_id, state);

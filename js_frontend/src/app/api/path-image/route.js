@@ -68,15 +68,24 @@ function runPython(command, args, label = command) {
   })
 }
 
-async function generateImage(pathItems, outputPath) {
+async function normalizeTarget(target) {
+  if (!target) return null
+  const fullToShortNameMap = await getFullToShortNameMap()
+  const upper = String(target).trim().toUpperCase()
+  return fullToShortNameMap[upper] || upper
+}
+
+async function generateImage(pathItems, outputPath, target) {
   const normalizedPathItems = await normalizePathItems(pathItems)
+  const normalizedTarget = await normalizeTarget(target)
   const payload = JSON.stringify(normalizedPathItems)
+  const targetArgs = normalizedTarget ? ["--target", normalizedTarget] : []
   const errors = []
   const candidates = [
-    { command: "py", args: ["-3.13", builderScript, "--path-json", payload, "--output", outputPath], label: "py -3.13" },
-    { command: "py", args: ["-3", builderScript, "--path-json", payload, "--output", outputPath], label: "py -3" },
-    { command: "python", args: [builderScript, "--path-json", payload, "--output", outputPath], label: "python" },
-    { command: "py", args: [builderScript, "--path-json", payload, "--output", outputPath], label: "py" },
+    { command: "py", args: ["-3.13", builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs], label: "py -3.13" },
+    { command: "py", args: ["-3", builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs], label: "py -3" },
+    { command: "python", args: [builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs], label: "python" },
+    { command: "py", args: [builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs], label: "py" },
   ]
 
   console.log("[path-image] raw path items:", pathItems)
@@ -100,8 +109,10 @@ async function generateImage(pathItems, outputPath) {
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const rawPath = searchParams.get("path")
+  const target = searchParams.get("target")
   console.log("[path-image] request url:", request.url)
   console.log("[path-image] raw query path:", rawPath)
+  console.log("[path-image] target:", target)
 
   if (!rawPath) {
     console.error("[path-image] missing path query parameter")
@@ -120,7 +131,7 @@ export async function GET(request) {
   const outputPath = path.join(os.tmpdir(), `constellation-path-${Date.now()}.png`)
 
   try {
-    await generateImage(pathItems, outputPath)
+    await generateImage(pathItems, outputPath, target)
     const image = await fs.readFile(outputPath)
     console.log("[path-image] image generated successfully")
     await fs.unlink(outputPath).catch(() => {})

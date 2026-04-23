@@ -112,16 +112,23 @@ function normalizeGameState(rawState, { initialLives, difficulty, inputMethod, p
   )
   const maxLives = Number(rawState.maxLives ?? rawState.max_lives ?? previousState?.maxLives ?? initialLives)
 
+  const playerTurn = rawState.player_turn ?? rawState.isPlayerTurn
   const gameStatus =
     rawState.gameStatus ??
     rawState.status ??
     rawState.result ??
     (rawState.game_over
-      ? currentConstellation === targetConstellation || Number(rawState.model_lives) <= 0
+      ? currentConstellation === targetConstellation
+        ? (playerTurn === false ? "won" : "lost")
+        : Number(rawState.model_lives) <= 0
         ? "won"
-        : "lost"
+        : Number(rawState.player_lives) <= 0
+        ? "lost"
+        : playerTurn === true
+        ? "lost"
+        : "won"
       : null) ??
-    previousState?.gameStatus ?? // vg
+    previousState?.gameStatus ??
     "playing"
 
   const endReason =
@@ -134,7 +141,7 @@ function normalizeGameState(rawState, { initialLives, difficulty, inputMethod, p
         ? "Закончились жизни"
         : Number(rawState.model_lives) <= 0
         ? "У ИИ закончились жизни"
-        : "Игра завершена"
+        : "Нет доступных ходов"
       : "") ??
     previousState?.endReason ??
     ""
@@ -179,7 +186,6 @@ async function readResponsePayload(response) {
   }
 }
 
-// Grid-based constellation background - avoids overlapping and excluded zones
 function ConstellationBackground({
   usedConstellations,
   onSelect,
@@ -503,14 +509,28 @@ function GameContent() {
     setInput(name)
   }, [])
 
-  const handleEndGame = useCallback(() => {
-    if (gameState) {
-      setGameState((prev) => prev ? {
-        ...prev,
-        gameStatus: "lost",
-        endReason: "Игра завершена досрочно",
-      } : null)
+  const handleEndGame = useCallback(async () => {
+    if (!gameState || gameState.gameStatus !== "playing") return
+
+    // Call Java backend to mark game as finished/lost in DB
+    const token = localStorage.getItem('authToken')
+    if (token) {
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
+      try {
+        await fetch(`${apiBaseUrl}/api/games/abort`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      } catch (err) {
+        console.error('Failed to abort game on backend:', err)
+      }
     }
+
+    setGameState((prev) => prev ? {
+      ...prev,
+      gameStatus: "lost",
+      endReason: "Игра завершена досрочно",
+    } : null)
   }, [gameState])
 
   useEffect(() => {
@@ -548,7 +568,7 @@ function GameContent() {
 
   return (
     <main
-      className={`relative isolate min-h-screen bg-background flex flex-col items-center justify-center px-8 py-7 transition-colors duration-300 md:px-14 md:py-12 ${
+      className={`relative isolate h-screen bg-background flex flex-col items-center justify-center px-8 py-7 transition-colors duration-300 md:px-14 md:py-12 overflow-hidden ${
         feedback === "success" ? "bg-green-950/30" : feedback === "error" ? "bg-red-950/30" : ""
       }`}
     >
@@ -670,13 +690,6 @@ function GameContent() {
         </div>
       )}
 
-      {gameState.difficulty === "hard" && (
-        <div className="mb-8 text-center relative z-10">
-          <p className="text-lg text-muted-foreground/60 tracking-[0.15em]">
-            ИИ играет с максимальной точностью
-          </p>
-        </div>
-      )}
 
       <div className="fixed bottom-7 left-8 z-50 flex flex-col items-start md:bottom-12 md:left-14">
         <p className="text-base text-muted-foreground/60 mb-1 uppercase tracking-[0.15em]">

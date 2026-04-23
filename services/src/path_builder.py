@@ -8,6 +8,7 @@ import pandas as pd
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.patheffects as pe
 
 
 DATA_DIR = Path(__file__).resolve().parent
@@ -190,7 +191,7 @@ def plot_wrapped_line(axis, x, y, **kwargs):
     axis.plot(seg_x, seg_y, solid_joinstyle="round", solid_capstyle="round", **kwargs)
 
 
-def build_path_image(path_items, output_path):
+def build_path_image(path_items, output_path, target=None):
     const, ra, dec = load_boundaries()
     fill_names = normalize_path(path_items)
     print(f"[path_builder] normalized path: {fill_names}")
@@ -284,13 +285,49 @@ def build_path_image(path_items, output_path):
         axis.text(
             ordered_ra[0],
             ordered_dec[0] + 4,
-            ordered_names[0],
-            color="#29d17d",
-            fontsize=10,
+            "Старт",
+            color="#5eeaa0",
+            fontsize=13,
+            fontweight="bold",
+            fontfamily="sans-serif",
             ha="center",
             va="bottom",
             zorder=12,
+            path_effects=[pe.withStroke(linewidth=3, foreground="#0a5c2e")],
         )
+
+    if target:
+        target_name = normalize_path([target])[0]
+        target_indices = np.where(const == target_name)[0]
+        if len(target_indices) > 0:
+            target_ra_pts = ra[target_indices]
+            target_dec_pts = dec[target_indices]
+            if target_name == "SCL":
+                t_ra, t_dec = 10.4, -32.12
+            else:
+                t_ra, t_dec = center_one_half_prefer_right(target_ra_pts, target_dec_pts)
+
+            axis.scatter(
+                [t_ra],
+                [t_dec],
+                color="#29d17d",
+                s=55,
+                zorder=11,
+            )
+
+            axis.text(
+                t_ra,
+                t_dec + 4,
+                "Финиш",
+                color="#5eeaa0",
+                fontsize=13,
+                fontweight="bold",
+                fontfamily="sans-serif",
+                ha="center",
+                va="bottom",
+                zorder=12,
+                path_effects=[pe.withStroke(linewidth=3, foreground="#0a5c2e")],
+            )
 
     axis.set_facecolor("#090b17")
     axis.set_xlim(360, 0)
@@ -313,11 +350,12 @@ def main():
         help="Path items either as JSON array or as comma-separated string like 'CMA, MON, ORI'",
     )
     parser.add_argument("--output", required=True, help="Output PNG path")
+    parser.add_argument("--target", default=None, help="Target constellation short name")
     args = parser.parse_args()
 
     path_items = parse_path_argument(args.path_json)
     print(f"[path_builder] building image for path items: {path_items}")
-    build_path_image(path_items, args.output)
+    build_path_image(path_items, args.output, target=args.target)
 
 if __name__ == "__main__":
     main()
