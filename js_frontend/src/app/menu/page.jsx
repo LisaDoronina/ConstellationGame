@@ -4,9 +4,9 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 
 const presetModes = [
-  { id: "easy", label: "Легкий", description: "5 жизней, подсказки." },
+  { id: "easy", label: "Легкий", description: "5 жизней, подсказки, выбор из списка" },
   { id: "normal", label: "Средний", description: "3 жизни, подсказки" },
-  { id: "hard", label: "Сложный", description: "1 жизнь, нет подсказок" },
+  { id: "hard", label: "Сложный", description: "3 жизни, нет подсказок" },
 ]
 
 const difficultyChoices = [
@@ -53,9 +53,9 @@ export default function MenuPage() {
     }
 
     const presets = {
-      easy: { lives: 5, difficulty: "easy", inputMethod: "type" },
-      normal: { lives: 3, difficulty: "medium", inputMethod: "type" },
-      hard: { lives: 1, difficulty: "hard", inputMethod: "type" },
+      easy: { lives: 5, difficulty: "easy", inputMethod: "select" },
+      normal: { lives: 3, difficulty: "easy", inputMethod: "type" },
+      hard: { lives: 3, difficulty: "hard", inputMethod: "type" },
     }
 
     return presets[selectedMode]

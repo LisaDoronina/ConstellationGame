@@ -560,8 +560,8 @@ function GameContent() {
   }
 
   const neighborMoves = gameState.availableMoves || []
-  const showNeighbors = gameState.difficulty === "easy"
-  const showSelectBackground = inputMethod === "select"
+  const showNeighbors = inputMethod === "select"
+  const showHints = gameState.difficulty === "easy"
 
   const gameParams = `lives=${lives}&difficulty=${difficulty}&inputMethod=${inputMethod}`
   const returnUrl = `/game?${gameParams}`
@@ -579,14 +579,7 @@ function GameContent() {
         className="pointer-events-none fixed inset-0 -z-20 h-full w-full object-cover"
       />
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
-      {showSelectBackground && (
-        <ConstellationBackground
-          usedConstellations={gameState.usedConstellations}
-          onSelect={handleSelectConstellation}
-          isPlayerTurn={gameState.isPlayerTurn}
-          showUsed={true}
-        />
-      )}
+
 
       <Link href={`/rules?returnTo=${encodeURIComponent(returnUrl)}`} className={topRightButtonClass}>
         Правила
@@ -656,15 +649,17 @@ function GameContent() {
 
       {requestError && <p className="text-2xl mb-3 text-red-400 relative z-10 tracking-[0.08em]">{requestError}</p>}
 
-      <button
-        onClick={checkIfUsed}
-        disabled={!input.trim() || isWaitingForModel}
-        className={`text-4xl mb-6 transition-colors duration-200 relative z-10 tracking-[0.08em] ${
-          checkResult === "used" ? "text-amber-500" : "text-zinc-400 hover:text-zinc-300 disabled:opacity-30"
-        }`}
-      >
-        {checkResult === "used" ? "Уже названо" : checkResult === "unused" ? "Ещё не названо" : "Проверить"}
-      </button>
+      {showHints && (
+        <button
+          onClick={checkIfUsed}
+          disabled={!input.trim() || isWaitingForModel}
+          className={`text-4xl mb-6 transition-colors duration-200 relative z-10 tracking-[0.08em] ${
+            checkResult === "used" ? "text-amber-500" : "text-zinc-400 hover:text-zinc-300 disabled:opacity-30"
+          }`}
+        >
+          {checkResult === "used" ? "Уже названо" : checkResult === "unused" ? "Ещё не названо" : "Проверить"}
+        </button>
+      )}
 
       {showNeighbors && (
         <div className="mb-8 text-center relative z-10">
