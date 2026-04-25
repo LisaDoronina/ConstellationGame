@@ -1,9 +1,12 @@
 package com.game.auth.service;
 
+
 import com.game.auth.dto.GameInfoDTO;
+import com.game.auth.dto.GameResponseDTO;
 import com.game.auth.entity.Game;
 import com.game.auth.repository.GameRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,7 +22,7 @@ public class GameService {
 
   public List<GameInfoDTO> getRecentGames(Long userId, int limit) {
     Pageable pageable = PageRequest.of(0, limit);
-    List<Game> games = gameRepository.findByUserIdOrderByIdDesc(userId, pageable);
+    Page<Game> games = gameRepository.findByUserIdOrderByIdDesc(userId, pageable);
     return games.stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
@@ -37,12 +40,16 @@ public class GameService {
     return true;
   }
 
-  public List<GameInfoDTO> getUserGamesPaginated(Long userId, int page, int size) {
+  public GameResponseDTO getUserGamesPaginated(Long userId, int page, int size) {
     Pageable pageable = PageRequest.of(page, size);
-    List<Game> games = gameRepository.findByUserIdOrderByIdDesc(userId, pageable);
-    return games.stream()
+    Page<Game> gamesPage = gameRepository.findByUserIdOrderByIdDesc(userId, pageable);
+    List<GameInfoDTO> games = gamesPage.getContent().stream()
             .map(this::convertToDTO)
             .collect(Collectors.toList());
+
+    boolean hasMore = gamesPage.hasNext();
+
+    return new GameResponseDTO(games, hasMore, gamesPage.getTotalElements());
   }
 
   private GameInfoDTO convertToDTO(Game game) {
