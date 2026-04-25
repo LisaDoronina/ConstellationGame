@@ -118,14 +118,21 @@ export default function ProfilePage() {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [error, setError] = useState(null)
 
-  const fetchGames = useCallback(async () => {
+  // NEW: Pagination state
+  const [currentPage, setCurrentPage] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+  const [totalCount, setTotalCount] = useState(0)
+
+  // MODIFIED: Now fetches paginated games
+  const fetchGames = useCallback(async (pageNum = 0, append = false) => {
     const token = localStorage.getItem('authToken')
     if (!token) return
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/games/recent`,
-        { headers: { 'Authorization': `Bearer ${token}` } }
+          `${API_BASE_URL}/api/games?page=${pageNum}&size=5`,
+          { headers: { 'Authorization': `Bearer ${token}` } }
       )
 
       if (response.status === 401) {
@@ -140,9 +147,16 @@ export default function ProfilePage() {
       if (!response.ok) throw new Error('Не удалось загрузить историю игр')
 
       const data = await response.json()
-      const games = data.games || []
 
-      setGameHistory(games)
+      if (append) {
+        setGameHistory(prev => [...prev, ...data.games])
+      } else {
+        setGameHistory(data.games)
+      }
+
+      setHasMore(data.hasMore)
+      setTotalCount(data.totalCount)
+      setCurrentPage(pageNum)
       setError(null)
     } catch (err) {
       console.error('Error fetching game history:', err)
@@ -150,6 +164,7 @@ export default function ProfilePage() {
     }
   }, [router])
 
+  // Load first 5 games on mount
   useEffect(() => {
     const token = localStorage.getItem('authToken')
     const storedUsername = localStorage.getItem('username')
@@ -161,8 +176,16 @@ export default function ProfilePage() {
 
     setUsername(storedUsername)
 
-    fetchGames().finally(() => setIsLoading(false))
+    fetchGames(0, false).finally(() => setIsLoading(false))
   }, [router, fetchGames])
+
+  // NEW: Load 5 more games
+  const loadMoreGames = async () => {
+    if (!hasMore || isLoadingMore) return
+    setIsLoadingMore(true)
+    await fetchGames(currentPage + 1, true)
+    setIsLoadingMore(false)
+  }
 
   const handleGameClick = (game) => {
     const { pathNames, startName, finishName } = parseGameState(game.path)
@@ -239,9 +262,9 @@ export default function ProfilePage() {
               История игр
             </h1>
             {gameHistory.length > 0 && (
-              <Link href="/menu" className={topRightButtonClass}>
-                К игре
-              </Link>
+                <Link href="/menu" className={topRightButtonClass}>
+                  К игре
+                </Link>
             )}
             <div className={topLeftUserClass}>
               {username}
@@ -255,7 +278,7 @@ export default function ProfilePage() {
                     {error}
                   </p>
                   <button
-                      onClick={() => { setIsLoading(true); setError(null); fetchGames().finally(() => setIsLoading(false)) }}
+                      onClick={() => { setIsLoading(true); setError(null); fetchGames(0, false).finally(() => setIsLoading(false)) }}
                       className="mt-8 text-4xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white"
                   >
                     Повторить
@@ -283,6 +306,29 @@ export default function ProfilePage() {
                       />
                   ))}
 
+                  {/* NEW: Load More Button */}
+                  {hasMore && (
+                      <div className="flex justify-center mt-8">
+                        <button
+                            onClick={loadMoreGames}
+                            disabled={isLoadingMore}
+                            className="group px-8 py-4 text-3xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isLoadingMore ? "Загрузка..." : "+ Ещё 5 игр"}
+                        </button>
+                      </div>
+                  )}
+
+                  {/* NEW: End of list message */}
+                  {!hasMore && gameHistory.length > 0 && (
+                      <div className="flex justify-center mt-8">
+                        <p className="text-2xl tracking-[0.08em] text-zinc-500">
+                          {totalCount === gameHistory.length
+                              ? `Все ${totalCount} игр загружены`
+                              : "✨ Конец списка"}
+                        </p>
+                      </div>
+                  )}
                 </div>
             )}
           </div>

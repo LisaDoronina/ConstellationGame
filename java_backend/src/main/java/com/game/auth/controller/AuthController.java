@@ -4,6 +4,8 @@ import com.game.auth.dto.*;
 import com.game.auth.entity.User;
 import com.game.auth.service.AuthenticationService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -22,7 +24,14 @@ public class AuthController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+  public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request, BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+      Map<String, String> error = new HashMap<>();
+      FieldError firstError = bindingResult.getFieldErrors().get(0);
+      error.put("error", firstError.getDefaultMessage());
+      return ResponseEntity.badRequest().body(error);
+    }
+
     try {
       User user = authService.register(request);
 

@@ -1,6 +1,7 @@
 package com.game.auth.controller;
 
 import com.game.auth.dto.GameInfoDTO;
+import com.game.auth.dto.GameResponseDTO;
 import com.game.auth.entity.User;
 import com.game.auth.service.AuthenticationService;
 import com.game.auth.service.GameService;
@@ -61,18 +62,12 @@ public class GameController {
   public ResponseEntity<?> getAllGames(
           @RequestHeader("Authorization") String authHeader,
           @RequestParam(defaultValue = "0") int page,
-          @RequestParam(defaultValue = "10") int size) {
+          @RequestParam(defaultValue = "5") int size) {
     try {
       User user = authService.getCurrentUser(authHeader);
-      List<GameInfoDTO> games = gameService.getUserGamesPaginated(user.getId(), page, size);
+      GameResponseDTO games = gameService.getUserGamesPaginated(user.getId(), page, size);
 
-      Map<String, Object> response = new HashMap<>();
-      response.put("games", games);
-      response.put("page", page);
-      response.put("size", size);
-      response.put("count", games.size());
-
-      return ResponseEntity.ok(response);
+      return ResponseEntity.ok(games);
     } catch (RuntimeException e) {
       Map<String, String> error = new HashMap<>();
       error.put("error", e.getMessage());
