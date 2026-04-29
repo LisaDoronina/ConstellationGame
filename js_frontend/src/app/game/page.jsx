@@ -7,13 +7,13 @@ import { allConstellations } from "./constellations-data"
 import shortToFullNames from "./short-to-full-names"
 
 const topRightButtonClass =
-  "fixed top-7 right-8 z-50 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white md:top-12 md:right-14 md:text-5xl"
+  "fixed top-12 right-16 z-50 origin-right text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white md:text-5xl"
 
 const topLeftUserClass =
-  "fixed top-7 left-8 z-50 text-left text-4xl text-zinc-300 md:top-12 md:left-14 md:text-5xl"
+  "fixed top-12 left-16 z-50 text-left text-4xl text-zinc-300 md:text-5xl"
 
 const bottomRightActionClass =
-  "fixed bottom-7 right-8 z-50 whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:bottom-12 md:right-14 md:text-6xl"
+  "fixed bottom-12 right-16 z-50 origin-right whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-6xl"
 
 function toFullConstellationName(name) {
   if (typeof name !== "string") return name
@@ -686,7 +686,7 @@ function GameContent() {
       )}
 
 
-      <div className="fixed bottom-7 left-8 z-50 flex flex-col items-start md:bottom-12 md:left-14">
+      <div className="fixed bottom-12 left-16 z-50 flex flex-col items-start">
         <p className="text-base text-muted-foreground/60 mb-1 uppercase tracking-[0.15em]">
           Жизни
         </p>

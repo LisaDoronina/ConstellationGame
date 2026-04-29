@@ -6,13 +6,13 @@ import { useRouter } from "next/navigation"
 import { allConstellations } from "../game/constellations-data"
 
 const topRightButtonClass =
-    "fixed top-7 right-8 z-50 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white hover:scale-105 md:top-12 md:right-14 md:text-5xl"
+    "fixed top-12 right-16 z-50 origin-right text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
 const topLeftUserClass =
-    "fixed top-7 left-8 z-50 text-left text-4xl uppercase tracking-[0.18em] text-zinc-300 md:top-12 md:left-14 md:text-5xl"
+    "fixed top-12 left-16 z-50 text-left text-4xl uppercase tracking-[0.18em] text-zinc-300 md:text-5xl"
 
 const logoutButtonClass =
-    "fixed bottom-7 left-8 z-50 text-left text-3xl uppercase tracking-[0.14em] text-zinc-500 transition-all duration-200 hover:text-red-400 hover:scale-105 md:bottom-12 md:left-14 md:text-4xl"
+    "fixed bottom-12 left-16 z-50 text-left text-3xl uppercase tracking-[0.14em] text-zinc-500 transition-all duration-200 hover:text-red-400 hover:scale-105 md:text-4xl"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
 

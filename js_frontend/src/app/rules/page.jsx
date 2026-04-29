@@ -6,10 +6,10 @@ import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
 
 const topRightButtonClass =
-  "fixed top-7 right-8 z-50 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white md:top-12 md:right-14 md:text-5xl"
+    "fixed top-12 right-16 z-50 origin-right text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
 const topLeftUserClass =
-  "fixed top-7 left-8 z-50 text-left text-4xl text-zinc-300 md:top-12 md:left-14 md:text-5xl"
+    "fixed top-12 left-16 z-50 text-left text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
 function RulesContent() {
   const searchParams = useSearchParams()
@@ -27,32 +27,27 @@ function RulesContent() {
   }, [])
 
   return (
-    <main className="relative isolate min-h-screen bg-background px-8 py-7 md:px-14 md:py-12">
-      <img
-        src="/background_v3.jpg"
-        alt=""
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 -z-20 h-full w-full object-cover"
-      />
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col">
-        <div className="mt-2 flex items-end justify-between gap-8">
-          <Link href={isLoggedIn ? "/profile" : "/login"} className={`${topLeftUserClass} uppercase tracking-[0.18em] transition-all duration-200 hover:text-white hover:scale-105`}>
-            {isLoggedIn ? username : "Вход"}
-          </Link>
-
-          <h1 className="pointer-events-none absolute left-1/2 -translate-x-1/2 translate-y-1 whitespace-nowrap text-center text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
-            Правила</h1>
-
+      <main className="relative isolate h-screen bg-background">
+        <img
+            src="/background_v3.jpg"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none fixed inset-0 -z-20 h-full w-full object-cover"
+        />
+        <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
+        <div className="mx-auto flex h-full w-full flex-col px-8 py-7 md:px-14 md:py-12">
+          <div className="pointer-events-none text-center whitespace-nowrap text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
+            Правила
+          </div>
           <Link
-            href={returnTo || "/menu"}
-            className={topRightButtonClass}
+              href={returnTo || "/menu"}
+              className={topRightButtonClass}
           >
             Назад
           </Link>
-        </div>
 
-        <div className="mt-16 flex flex-1 flex-col gap-10 md:mt-20">
+
+        <div className="mt-16 flex flex-1 flex-col gap-10 md:mt-20 py-15 md:px-12">
           <section>
             <h2 className="mb-4 whitespace-nowrap text-5xl font-bold uppercase tracking-[0.18em] text-foreground">
               Цель игры

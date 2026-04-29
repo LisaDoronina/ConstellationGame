@@ -60,7 +60,7 @@ export default function LoginPage() {
         localStorage.setItem('userId', data.id)
         localStorage.setItem('isLoggedIn', 'true')
 
-        router.push('/profile')
+        router.push('/menu')
       } else {
         // Ошибка входа
         setError(data.error || "Неверный логин или пароль")
