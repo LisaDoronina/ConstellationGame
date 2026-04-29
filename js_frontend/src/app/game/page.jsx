@@ -7,7 +7,7 @@ import { allConstellations } from "./constellations-data"
 import shortToFullNames from "./short-to-full-names"
 
 const topRightButtonClass =
-  "fixed top-12 right-16 z-50 origin-right text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white md:text-5xl"
+  "fixed top-12 right-16 z-50 origin-right text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
 const topLeftUserClass =
   "fixed top-12 left-16 z-50 text-left text-4xl text-zinc-300 md:text-5xl"
@@ -568,7 +568,7 @@ function GameContent() {
 
   return (
     <main
-      className={`relative isolate h-screen bg-background flex flex-col items-center justify-center px-8 py-7 transition-colors duration-300 md:px-14 md:py-12 overflow-hidden ${
+      className={`relative isolate h-screen bg-background flex flex-col items-center px-8 py-7 transition-colors duration-300 md:px-14 md:py-12 overflow-hidden ${
         feedback === "success" ? "bg-green-950/30" : feedback === "error" ? "bg-red-950/30" : ""
       }`}
     >
@@ -603,7 +603,7 @@ function GameContent() {
         </div>
       </div>
 
-      <div className="relative z-10 mb-6 flex w-full max-w-3xl flex-col items-center gap-1 text-center">
+      <div className="relative  z-10 mt-10 mb-6 flex w-full max-w-3xl flex-col items-center gap-1 text-center">
         <p className="text-5xl tracking-[0.08em] text-white md:text-6xl text-bold ">
           Текущее созвездие
         </p>
@@ -662,8 +662,7 @@ function GameContent() {
       )}
 
       {showNeighbors && (
-        <div className="mb-8 text-center relative z-10">
-          <p className="mb-2 text-2xl tracking-[0.12em] text-zinc-300">Доступные соседи</p>
+        <div className="mb-8 -mt-2 text-center relative z-10">
           <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-x-4 gap-y-3 px-4">
             {neighborMoves.map((move) => (
               <button
@@ -687,7 +686,7 @@ function GameContent() {
 
 
       <div className="fixed bottom-12 left-16 z-50 flex flex-col items-start">
-        <p className="text-base text-muted-foreground/60 mb-1 uppercase tracking-[0.15em]">
+        <p className="text-muted-foreground/60 mb-1 uppercase tracking-[0.15em] text-3xl">
           Жизни
         </p>
         <div className="flex gap-2">

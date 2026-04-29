@@ -5,14 +5,14 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { Suspense } from "react"
 
-const rulesButtonClass =
-  "pointer-events-auto fixed top-12 right-16 z-50 origin-right text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white hover:scale-105 md:text-5xl"
+const backButtonClass =
+  "pointer-events-auto origin-right text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
 const topLeftUserClass =
-  "pointer-events-auto fixed top-12 left-16 z-50 text-left text-4xl text-zinc-300 uppercase tracking-[0.18em] transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
+  "pointer-events-auto origin-left text-left text-4xl text-zinc-300 uppercase tracking-[0.18em] transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
 const actionButtonClass =
-  "pointer-events-auto fixed bottom-12 right-16 z-50 origin-right whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-6xl"
+  "pointer-events-auto origin-right whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-6xl"
 
 function ResultContent() {
   const searchParams = useSearchParams()
@@ -47,20 +47,7 @@ function ResultContent() {
     path.length > 0 ? `/api/path-image?path=${encodeURIComponent(JSON.stringify(path))}&target=${encodeURIComponent(target)}` : null
 
   return (
-    <>
-      <div className="pointer-events-none fixed inset-0 z-50">
-        <Link href={isLoggedIn ? "/profile" : "/login"} className={topLeftUserClass}>
-          {isLoggedIn ? username : "Вход"}
-        </Link>
-        <Link href={backHref} className={rulesButtonClass}>
-          Назад
-        </Link>
-        <Link href="/menu" className={actionButtonClass}>
-          На главную
-        </Link>
-      </div>
-
-      <main className="relative isolate min-h-screen bg-background">
+    <main className="relative isolate min-h-screen bg-background">
         <img
           src="/background_v3.jpg"
           alt=""
@@ -69,20 +56,30 @@ function ResultContent() {
         />
         <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
 
-        <div className="mx-auto flex min-h-screen w-full flex-col px-16 py-7 md:px-28 md:py-12">
-        <div className="pointer-events-none text-center whitespace-nowrap text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
-          {result === "won" ? "Победа" : "Поражение"}
-        </div>
+        <div className="relative mx-auto flex min-h-screen w-full flex-col px-16 py-12">
+          <div className="relative flex items-start justify-center">
+            <Link href={isLoggedIn ? "/profile" : "/login"} className={`absolute left-0 ${topLeftUserClass}`}>
+              {isLoggedIn ? username : "Вход"}
+            </Link>
+            <div className="pointer-events-none whitespace-nowrap text-center text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
+              {result === "won" ? "Победа" : "Поражение"}
+            </div>
+            {from === "profile" && (
+              <Link href={backHref} className={`absolute right-0 ${backButtonClass}`}>
+                Назад
+              </Link>
+            )}
+          </div>
 
         <div className="mt-20 flex justify-between gap-8 md:mt-14">
           <div className="text-left">
             <p className="ml-8 text-5xl font-bold tracking-[0.08em] text-white">Старт</p>
-            <p className="ml-12 text-5xl tracking-[0.08em] text-zinc-400">{start}</p>
+            <p className="ml-14 text-5xl tracking-[0.08em] text-zinc-400">{start}</p>
           </div>
 
           <div className="text-right origin-right">
-            <p className="origin-right mr-14 text-5xl font-bold tracking-[0.08em] text-white">Финиш</p>
-            <p className="origin-right text-5xl tracking-[0.08em] text-zinc-400">{target}</p>
+            <p className="origin-right mr-16 text-5xl font-bold tracking-[0.08em] text-white">Финиш</p>
+            <p className="origin-right mr-8 text-5xl tracking-[0.08em] text-zinc-400">{target}</p>
           </div>
         </div>
 
@@ -102,10 +99,13 @@ function ResultContent() {
               {path.length > 0 ? path.join(" → ") : reason}
             </p>
           </div>
+
         </div>
+          <Link href="/menu" className={`absolute bottom-12 right-14 ${actionButtonClass}`}>
+            На главную
+          </Link>
         </div>
-      </main>
-    </>
+    </main>
   )
 }
 
