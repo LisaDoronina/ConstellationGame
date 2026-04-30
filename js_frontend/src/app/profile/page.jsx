@@ -17,10 +17,6 @@ const logoutButtonClass =
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
 
 function buildIdToNameMap() {
-  // Must match C++ std::map ordering (lexicographic by UTF-8 bytes).
-  // JS default .sort() compares by UTF-16 code units, which can differ from
-  // UTF-8 byte order for characters across the D0/D1 boundary (e.g. Орёл vs Орион).
-  // Use explicit byte-level comparison via TextEncoder to match C++ exactly.
   const encoder = new TextEncoder()
   const sorted = [...allConstellations].sort((a, b) => {
     const ba = encoder.encode(a)

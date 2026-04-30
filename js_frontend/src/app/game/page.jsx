@@ -597,92 +597,94 @@ function GameContent() {
           <p className="text-5xl font-bold tracking-[0.08em] text-white">Старт</p>
           <p className="text-5xl tracking-[0.08em] text-zinc-300">{gameState.startConstellation}</p>
         </div>
-        <div className="flex flex-col gap-1 text-right">
+        <div className="flex flex-col gap-1 text-right [&>p]:origin-right">
           <p className="text-5xl font-bold tracking-[0.08em] text-white">Финиш</p>
           <p className="text-5xl tracking-[0.08em] text-zinc-300">{gameState.targetConstellation}</p>
         </div>
       </div>
 
-      <div className="relative  z-10 mt-10 mb-6 flex w-full max-w-3xl flex-col items-center gap-1 text-center">
-        <p className="text-5xl tracking-[0.08em] text-white md:text-6xl text-bold ">
-          Текущее созвездие
-        </p>
-        <p className="text-5xl md:text-6xl font-bold text-foreground tracking-[0.12em] drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
-          {gameState.currentConstellation}
-        </p>
-      </div>
-
-      <div className="relative z-10 mb-4 flex w-full max-w-3xl flex-col items-center">
-        <div className="mb-6 h-px w-24 bg-foreground/20" />
-        <div className="flex min-h-[2.5rem] items-center justify-center tracking-[0.1em] text-zinc-300">
-          {isWaitingForModel || !gameState.isPlayerTurn ? (
-            <ThinkingDots />
-          ) : (
-            <p className="text-4xl text-center">Ваш ход</p>
-          )}
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center w-full -mt-12">
+        <div className="mb-4 flex w-full max-w-3xl flex-col items-center gap-1 text-center [&>p]:origin-center">
+          <p className="text-5xl tracking-[0.08em] text-white md:text-6xl text-bold">
+            Текущее созвездие
+          </p>
+          <p className="text-5xl md:text-6xl font-bold text-foreground tracking-[0.12em] drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
+            {gameState.currentConstellation}
+          </p>
         </div>
-      </div>
 
-      <form onSubmit={handleSubmit} className="w-full max-w-xl mb-4 relative z-10">
-        <div className="relative">
-          <input
-            ref={inputRef}
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Введите созвездие..."
-            disabled={!gameState.isPlayerTurn || gameState.gameStatus !== "playing" || isWaitingForModel}
-            className="relative z-10 w-full bg-transparent border-b-2 border-foreground/30 text-foreground text-left text-4xl py-2 tracking-[0.08em] placeholder:text-zinc-600 focus:outline-none focus:border-foreground transition-colors disabled:opacity-50"
-          />
-          {autocomplete && autocomplete.toLowerCase() !== input.toLowerCase() && (
-            <div className="absolute inset-0 flex items-center pointer-events-none">
-              <span className="text-4xl text-zinc-500 tracking-[0.08em]">
-                <span className="invisible">{input}</span>
-                <span>{autocomplete.slice(input.length)}</span>
-              </span>
-            </div>
-          )}
-        </div>
-        {autocomplete && <p className="text-2xl text-zinc-500 mt-2 text-left tracking-[0.08em]">Tab для автодополнения</p>}
-      </form>
-
-      {requestError && <p className="text-2xl mb-3 text-red-400 relative z-10 tracking-[0.08em]">{requestError}</p>}
-
-      {showHints && (
-        <button
-          onClick={checkIfUsed}
-          disabled={!input.trim() || isWaitingForModel}
-          className={`text-4xl mb-6 transition-colors duration-200 relative z-10 tracking-[0.08em] ${
-            checkResult === "used" ? "text-amber-500" : "text-zinc-400 hover:text-zinc-300 disabled:opacity-30"
-          }`}
-        >
-          {checkResult === "used" ? "Уже названо" : checkResult === "unused" ? "Ещё не названо" : "Проверить"}
-        </button>
-      )}
-
-      {showNeighbors && (
-        <div className="mb-8 -mt-2 text-center relative z-10">
-          <div className="mx-auto flex max-w-5xl flex-wrap justify-center gap-x-4 gap-y-3 px-4">
-            {neighborMoves.map((move) => (
-              <button
-                key={move}
-                onClick={() => setInput(move)}
-                className={`inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-full px-4 py-2 text-xl leading-none transition-colors tracking-[0.06em] ${
-                  gameState.usedConstellations.has(move)
-                    ? "text-amber-500/70 hover:text-amber-500"
-                    : "text-foreground/70 hover:text-foreground"
-                }`}
-              >
-                {move}
-              </button>
-            ))}
-            {neighborMoves.length === 0 && (
-              <p className="text-lg text-muted-foreground tracking-[0.1em]">Нет доступных ходов</p>
+        <div className="mb-4 flex w-full max-w-3xl flex-col items-center">
+          <div className="mb-6 h-px w-24 bg-foreground/20 " />
+          <div className="flex min-h-[2.5rem] items-center justify-center tracking-[0.1em] text-zinc-300">
+            {isWaitingForModel || !gameState.isPlayerTurn ? (
+              <ThinkingDots />
+            ) : (
+              <p className="text-4xl text-center origin-center">Ваш ход</p>
             )}
           </div>
         </div>
-      )}
+
+        <div className="w-full max-w-xl mb-4 flex items-end gap-6">
+          <form onSubmit={handleSubmit} className="flex-1">
+            <div className="relative">
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Введите созвездие..."
+                disabled={!gameState.isPlayerTurn || gameState.gameStatus !== "playing" || isWaitingForModel}
+                className="relative z-10 w-full bg-transparent border-b-2 border-foreground/30 text-foreground text-left text-4xl py-2 tracking-[0.08em] placeholder:text-zinc-600 focus:outline-none focus:border-foreground transition-colors disabled:opacity-50"
+              />
+              {autocomplete && autocomplete.toLowerCase() !== input.toLowerCase() && (
+                <div className="absolute inset-0 flex items-center pointer-events-none">
+                  <span className="text-4xl text-zinc-500 tracking-[0.08em]">
+                    <span className="invisible">{input}</span>
+                    <span>{autocomplete.slice(input.length)}</span>
+                  </span>
+                </div>
+              )}
+            </div>
+            {autocomplete && <p className="text-2xl text-zinc-500 mt-2 text-left tracking-[0.08em]">Tab для автодополнения</p>}
+          </form>
+
+          {showHints && (
+            <div className="shrink-0 relative flex items-end pb-2 z-20">
+              <button
+                type="button"
+                onClick={checkIfUsed}
+                disabled={!input.trim() || isWaitingForModel}
+                className="text-4xl cursor-pointer transition-all duration-200 grayscale opacity-60 hover:opacity-100 hover:scale-105 disabled:opacity-20 disabled:cursor-not-allowed"
+                style={{ transform: 'scaleX(1)' }}
+              >
+                🔍
+              </button>
+            </div>
+          )}
+        </div>
+
+        {requestError && <p className="text-2xl mb-3 text-red-400 tracking-[0.08em]">{requestError}</p>}
+
+        {showNeighbors && (
+          <div className="mb-8 -mt-2 text-center max-w-4xl">
+            <div className="mx-auto flex flex-wrap justify-center gap-x-4 gap-y-3 px-4">
+              {neighborMoves.map((move) => (
+                <button
+                  key={move}
+                  onClick={() => setInput(move)}
+                  className="inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-full px-4 py-2 text-xl leading-none transition-colors tracking-[0.06em] text-foreground/70 hover:text-foreground"
+                >
+                  {move}
+                </button>
+              ))}
+              {neighborMoves.length === 0 && (
+                <p className="text-lg text-muted-foreground tracking-[0.1em]">Нет доступных ходов</p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
 
       <div className="fixed bottom-12 left-16 z-50 flex flex-col items-start">
@@ -700,6 +702,16 @@ function GameContent() {
           ))}
         </div>
       </div>
+
+      {checkResult && (
+        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50">
+          <p className={`text-4xl tracking-[0.08em] whitespace-nowrap ${
+            checkResult === "used" ? "text-amber-500" : "text-zinc-400"
+          }`}>
+            {checkResult === "used" ? "Уже названо" : "Ещё не названо"}
+          </p>
+        </div>
+      )}
 
       {/* End game button - bottom right with padding */}
       <button

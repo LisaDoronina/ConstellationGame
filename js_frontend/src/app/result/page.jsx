@@ -11,6 +11,9 @@ const backButtonClass =
 const topLeftUserClass =
   "pointer-events-auto origin-left text-left text-4xl text-zinc-300 uppercase tracking-[0.18em] transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
+const topRightButtonClass =
+  "pointer-events-auto origin-right text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
+
 const actionButtonClass =
   "pointer-events-auto origin-right whitespace-nowrap text-right text-5xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-6xl"
 
@@ -64,37 +67,42 @@ function ResultContent() {
             <div className="pointer-events-none whitespace-nowrap text-center text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
               {result === "won" ? "Победа" : "Поражение"}
             </div>
-            {from === "profile" && (
+            {from === "profile" ? (
               <Link href={backHref} className={`absolute right-0 ${backButtonClass}`}>
                 Назад
+              </Link>
+            ) : (
+              <Link href="/rules?returnTo=/result" className={`absolute right-0 ${topRightButtonClass}`}>
+                Правила
               </Link>
             )}
           </div>
 
-        <div className="mt-20 flex justify-between gap-8 md:mt-14">
+        <div className="mt-20 mx-auto flex w-full max-w-6xl justify-between gap-8 md:mt-14">
           <div className="text-left">
-            <p className="ml-8 text-5xl font-bold tracking-[0.08em] text-white">Старт</p>
+            <p className="text-5xl font-bold tracking-[0.08em] text-white">Старт</p>
             <p className="ml-14 text-5xl tracking-[0.08em] text-zinc-400">{start}</p>
           </div>
 
-          <div className="text-right origin-right">
-            <p className="origin-right mr-16 text-5xl font-bold tracking-[0.08em] text-white">Финиш</p>
-            <p className="origin-right mr-8 text-5xl tracking-[0.08em] text-zinc-400">{target}</p>
+          <div className="text-right [&>p]:origin-right">
+            <p className="mr-14 text-5xl tracking-[0.08em] text-zinc-400">{target}</p>
+            <p className="text-5xl font-bold tracking-[0.08em] text-white">Финиш</p>
+
           </div>
         </div>
 
         <div className="mt-10 flex flex-1 flex-col items-center gap-8 pb-24">
           {imageUrl ? (
-            <div className="flex w-full max-w-5xl items-center justify-center overflow-hidden border border-foreground/20 bg-foreground/5">
+            <div className="flex w-full max-w-6xl items-center justify-center overflow-hidden border border-foreground/20 bg-foreground/5">
               <img src={imageUrl} alt="Маршрут партии" className="h-auto w-full object-contain" />
             </div>
           ) : (
-            <div className="flex min-h-[28rem] w-full max-w-5xl items-center justify-center border border-foreground/20 bg-foreground/5">
+            <div className="flex min-h-[28rem] w-full max-w-6xl items-center justify-center border border-foreground/20 bg-foreground/5">
               <p className="text-5xl tracking-[0.08em] text-zinc-500">Изображение маршрута недоступно</p>
             </div>
           )}
 
-          <div className="w-full max-w-5xl">
+          <div className="w-full max-w-6xl">
             <p className="text-4xl tracking-[0.08em] text-zinc-400">
               {path.length > 0 ? path.join(" → ") : reason}
             </p>

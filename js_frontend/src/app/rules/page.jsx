@@ -27,7 +27,7 @@ function RulesContent() {
   }, [])
 
   return (
-      <main className="relative isolate h-screen bg-background">
+      <main className="relative isolate min-h-screen bg-background overflow-y-auto">
         <img
             src="/background_v3.jpg"
             alt=""
@@ -35,7 +35,7 @@ function RulesContent() {
             className="pointer-events-none fixed inset-0 -z-20 h-full w-full object-cover"
         />
         <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
-        <div className="mx-auto flex h-full w-full flex-col px-8 py-7 md:px-14 md:py-12">
+        <div className="mx-auto flex w-full flex-col px-8 py-7 md:px-18 md:py-12">
           <div className="pointer-events-none text-center whitespace-nowrap text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
             Правила
           </div>
@@ -47,12 +47,12 @@ function RulesContent() {
           </Link>
 
 
-        <div className="mt-16 flex flex-1 flex-col gap-10 md:mt-20 py-15 md:px-12">
+        <div className="mt-16 flex flex-1 flex-col gap-10 md:mt-14 ml-10 md:px-0 pb-20">
           <section>
-            <h2 className="mb-4 whitespace-nowrap text-5xl font-bold uppercase tracking-[0.18em] text-foreground">
+            <h2 className="mb-5 whitespace-nowrap text-5xl font-bold uppercase tracking-[0.18em] text-foreground">
               Цель игры
             </h2>
-            <div className="mb-6 h-px w-full bg-foreground/20" />
+            <div className="mb-8 h-px w-full bg-foreground/20" />
             <p className="max-w-5xl text-4xl tracking-[0.08em] text-zinc-400">
               Дойти от начального созвездия до конечного, перемещаясь только по соседним созвездиям.
               Побеждает тот, кто первым достигает финиша.
