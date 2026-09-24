@@ -537,6 +537,11 @@ function GameContent() {
     if (gameState?.gameStatus !== "playing" && gameState?.gameStatus) {
       const timeout = setTimeout(() => {
         const path = [gameState.startConstellation, ...gameState.moves.map((move) => move.constellation)]
+        const moveOwners = gameState.moves.map((move, i) => {
+          if (move.player && move.player !== "unknown") return move.player
+          // Infer: first move is player, then alternates (player, model, player, ...)
+          return i % 2 === 0 ? "player" : "model"
+        })
 
         const params = new URLSearchParams({
           result: gameState.gameStatus,
@@ -544,6 +549,7 @@ function GameContent() {
           start: gameState.startConstellation,
           target: gameState.targetConstellation,
           path: JSON.stringify(path),
+          moveOwners: JSON.stringify(moveOwners),
         })
         router.push(`/result?${params.toString()}`)
       }, 1500)

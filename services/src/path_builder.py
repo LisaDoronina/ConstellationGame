@@ -36,15 +36,17 @@ def load_boundaries():
 
     for i in range(np.size(np.array(frame["h "]))):
         current = np.array(frame["h "])[i].split()
+
         ra = np.append(
             ra,
             15
             * (
-                float(current[0])
-                + float(current[1]) / 60.0
-                + float(current[2]) / 3600.0
+                    float(current[0])
+                    + float(current[1]) / 60.0
+                    + float(current[2]) / 3600.0
             ),
-        )
+            )
+
         const[i] = const[i].replace(" ", "")
 
     return const, ra, dec
@@ -54,7 +56,11 @@ def load_name_mapping():
     with open(NAMES_PATH, "r", encoding="utf-8") as file:
         short_to_full = json.load(file)
 
-    full_to_short = {full.upper(): short.upper() for short, full in short_to_full.items()}
+    full_to_short = {
+        full.upper(): short.upper()
+        for short, full in short_to_full.items()
+    }
+
     return full_to_short
 
 
@@ -71,63 +77,78 @@ def normalize_path(path_items):
 
 def parse_path_argument(raw_path):
     if isinstance(raw_path, list):
-        print(f"[path_builder] path already list: {raw_path}")
         return raw_path
 
     if raw_path is None:
-        print("[path_builder] raw path is None")
         return []
 
     text = str(raw_path).strip()
-    print(f"[path_builder] raw path argument: {text}")
+
     if not text:
-        print("[path_builder] raw path is empty after trim")
         return []
 
     try:
         parsed = json.loads(text)
+
         if isinstance(parsed, list):
-            print(f"[path_builder] parsed JSON path: {parsed}")
             return parsed
+
     except json.JSONDecodeError:
-        print("[path_builder] raw path is not valid JSON, trying comma-separated parser")
         pass
 
-    parsed_items = [item.strip() for item in text.split(",") if item.strip()]
-    print(f"[path_builder] parsed CSV path: {parsed_items}")
-    return parsed_items
+    return [
+        item.strip()
+        for item in text.split(",")
+        if item.strip()
+    ]
 
 
-def fill_segment_to_edge(axis, sra, sdec, color="#00e600", alpha=0.2, zorder=1):
+def fill_segment_to_edge(
+        axis,
+        sra,
+        sdec,
+        color="#00e600",
+        alpha=0.2,
+        zorder=1,
+):
     sra = np.asarray(sra)
     sdec = np.asarray(sdec)
 
     if np.isclose(sra[0], 360) and np.isclose(sra[-1], 360):
         poly_ra = np.concatenate([sra, [360]])
         poly_dec = np.concatenate([sdec, [sdec[0]]])
-        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
+
     elif np.isclose(sra[0], 0) and np.isclose(sra[-1], 0):
         poly_ra = np.concatenate([sra, [0]])
         poly_dec = np.concatenate([sdec, [sdec[0]]])
-        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
+
     elif np.isclose(sra[0], 360):
         poly_ra = np.concatenate([sra, [360, 360]])
         poly_dec = np.concatenate([sdec, [sdec[-1], sdec[0]]])
-        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
+
     elif np.isclose(sra[-1], 360):
         poly_ra = np.concatenate([sra, [360, sra[0]]])
         poly_dec = np.concatenate([sdec, [sdec[0], sdec[0]]])
-        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
+
     elif np.isclose(sra[0], 0):
         poly_ra = np.concatenate([sra, [0, 0]])
         poly_dec = np.concatenate([sdec, [sdec[-1], sdec[0]]])
-        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
+
     elif np.isclose(sra[-1], 0):
         poly_ra = np.concatenate([sra, [0, sra[0]]])
         poly_dec = np.concatenate([sdec, [sdec[0], sdec[0]]])
-        axis.fill(poly_ra, poly_dec, color=color, alpha=alpha, zorder=zorder)
+
     else:
-        axis.fill(sra, sdec, color=color, alpha=alpha, zorder=zorder)
+        poly_ra = sra
+        poly_dec = sdec
+
+    axis.fill(
+        poly_ra,
+        poly_dec,
+        color=color,
+        alpha=alpha,
+        zorder=zorder,
+    )
 
 
 def center_one_half_prefer_right(racur, deccur):
@@ -148,8 +169,10 @@ def center_one_half_prefer_right(racur, deccur):
 
     if n_right >= n_left and n_right > 0:
         return np.mean(racur[right_mask]), np.mean(deccur[right_mask])
+
     if n_left > 0:
         return np.mean(racur[left_mask]), np.mean(deccur[left_mask])
+
     return np.mean(racur), np.mean(deccur)
 
 
@@ -168,41 +191,50 @@ def plot_wrapped_line(axis, x, y, **kwargs):
         y1, y2 = y[i - 1], y[i]
 
         if abs(x2 - x1) > 180:
+
             if x1 > x2:
                 t = (360 - x1) / ((x2 + 360) - x1)
                 y_cross = y1 + t * (y2 - y1)
+
                 seg_x.append(360)
                 seg_y.append(y_cross)
-                axis.plot(seg_x, seg_y, solid_joinstyle="round", solid_capstyle="round", **kwargs)
+
+                axis.plot(seg_x, seg_y, **kwargs)
+
                 seg_x = [0, x2]
                 seg_y = [y_cross, y2]
+
             else:
                 t = (0 - x1) / ((x2 - 360) - x1)
                 y_cross = y1 + t * (y2 - y1)
+
                 seg_x.append(0)
                 seg_y.append(y_cross)
-                axis.plot(seg_x, seg_y, solid_joinstyle="round", solid_capstyle="round", **kwargs)
+
+                axis.plot(seg_x, seg_y, **kwargs)
+
                 seg_x = [360, x2]
                 seg_y = [y_cross, y2]
+
         else:
             seg_x.append(x2)
             seg_y.append(y2)
 
-    axis.plot(seg_x, seg_y, solid_joinstyle="round", solid_capstyle="round", **kwargs)
+    axis.plot(seg_x, seg_y, **kwargs)
 
 
 def build_path_image(path_items, output_path, target=None):
     const, ra, dec = load_boundaries()
     fill_names = normalize_path(path_items)
-    print(f"[path_builder] normalized path: {fill_names}")
-    print(f"[path_builder] output path: {output_path}")
 
     figure, axis = plt.subplots(figsize=(12, 6), facecolor="#090b17")
+
     centers_ra = []
     centers_dec = []
     center_names = []
 
     for constellation in CONSTELLATIONS:
+
         indices = np.where(const == constellation)[0]
         racur = ra[indices]
         deccur = dec[indices]
@@ -217,7 +249,7 @@ def build_path_image(path_items, output_path, target=None):
         seg_dec = [decp[0]]
         segments = []
 
-        if constellation in fill_names and len(racur) > 0:
+        if constellation in fill_names:
             if constellation == "SCL":
                 cra, cdec = 10.4, -32.12
             else:
@@ -232,38 +264,54 @@ def build_path_image(path_items, output_path, target=None):
             dec1, dec2 = decp[i - 1], decp[i]
 
             if abs(ra2 - ra1) > 180:
+
                 if ra1 > ra2:
                     t = (360 - ra1) / ((ra2 + 360) - ra1)
                     dec_cross = dec1 + t * (dec2 - dec1)
+
                     seg_ra.append(360)
                     seg_dec.append(dec_cross)
+
                     segments.append((np.array(seg_ra), np.array(seg_dec)))
                     seg_ra = [0, ra2]
                     seg_dec = [dec_cross, dec2]
+
                 else:
                     t = (0 - ra1) / ((ra2 - 360) - ra1)
                     dec_cross = dec1 + t * (dec2 - dec1)
+
                     seg_ra.append(0)
                     seg_dec.append(dec_cross)
+
                     segments.append((np.array(seg_ra), np.array(seg_dec)))
                     seg_ra = [360, ra2]
                     seg_dec = [dec_cross, dec2]
+
             else:
                 seg_ra.append(ra2)
                 seg_dec.append(dec2)
 
         segments.append((np.array(seg_ra), np.array(seg_dec)))
+
         for sra, sdec in segments:
+
             axis.plot(sra, sdec, lw=0.7, color="white", alpha=0.75)
+
             if constellation in fill_names:
-                fill_segment_to_edge(axis, sra, sdec, color="#29d17d", alpha=0.18, zorder=0)
+                fill_segment_to_edge(axis, sra, sdec,
+                                     color="#29d17d", alpha=0.18, zorder=0)
 
     if centers_ra and centers_dec:
-        order = [center_names.index(name) for name in fill_names if name in center_names]
+
+        order = [
+            center_names.index(name)
+            for name in fill_names
+            if name in center_names
+        ]
         order = np.array(order)
+
         ordered_ra = np.array(centers_ra)[order]
         ordered_dec = np.array(centers_dec)[order]
-        ordered_names = np.array(center_names, dtype=object)[order]
 
         plot_wrapped_line(
             axis,
@@ -274,46 +322,53 @@ def build_path_image(path_items, output_path, target=None):
             zorder=10,
         )
 
-        axis.scatter(
-            [ordered_ra[0]],
-            [ordered_dec[0]],
-            color="#29d17d",
-            s=55,
-            zorder=11,
-        )
+        # START
+        start_ra = ordered_ra[0]
+        start_dec = ordered_dec[0]
+
+        axis.scatter([start_ra], [start_dec], color="#29d17d", s=70, zorder=20)
 
         axis.text(
-            ordered_ra[0],
-            ordered_dec[0] + 4,
+            start_ra,
+            start_dec + 4,
             "Старт",
             color="#5eeaa0",
             fontsize=13,
             fontweight="bold",
-            fontfamily="sans-serif",
             ha="center",
             va="bottom",
-            zorder=12,
+            zorder=21,
             path_effects=[pe.withStroke(linewidth=3, foreground="#0a5c2e")],
-        )
+            )
+
+        # FINISH
+        for idx, (ra_pt, dec_pt) in enumerate(zip(ordered_ra, ordered_dec)):
+
+            if idx % 2 == 0:
+                point_color = "#29d17d"
+            else:
+                point_color = "#6fdcff"
+
+            axis.scatter([ra_pt], [dec_pt], color=point_color, s=55, zorder=11)
 
     if target:
+
         target_name = normalize_path([target])[0]
         target_indices = np.where(const == target_name)[0]
+
         if len(target_indices) > 0:
+
             target_ra_pts = ra[target_indices]
             target_dec_pts = dec[target_indices]
+
             if target_name == "SCL":
                 t_ra, t_dec = 10.4, -32.12
             else:
-                t_ra, t_dec = center_one_half_prefer_right(target_ra_pts, target_dec_pts)
+                t_ra, t_dec = center_one_half_prefer_right(
+                    target_ra_pts, target_dec_pts
+                )
 
-            axis.scatter(
-                [t_ra],
-                [t_dec],
-                color="#29d17d",
-                s=55,
-                zorder=11,
-            )
+            axis.scatter([t_ra], [t_dec], color="#29d17d", s=70, zorder=20)
 
             axis.text(
                 t_ra,
@@ -322,40 +377,49 @@ def build_path_image(path_items, output_path, target=None):
                 color="#5eeaa0",
                 fontsize=13,
                 fontweight="bold",
-                fontfamily="sans-serif",
                 ha="center",
                 va="bottom",
-                zorder=12,
+                zorder=21,
                 path_effects=[pe.withStroke(linewidth=3, foreground="#0a5c2e")],
-            )
+                )
 
     axis.set_facecolor("#090b17")
     axis.set_xlim(360, 0)
     axis.set_ylim(-90, 90)
     axis.set_xticks([])
     axis.set_yticks([])
+
     for spine in axis.spines.values():
         spine.set_visible(False)
 
     plt.tight_layout()
-    figure.savefig(output_path, dpi=200, bbox_inches="tight", facecolor=figure.get_facecolor())
+
+    figure.savefig(
+        output_path,
+        dpi=200,
+        bbox_inches="tight",
+        facecolor=figure.get_facecolor(),
+    )
+
     plt.close(figure)
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--path-json",
-        required=True,
-        help="Path items either as JSON array or as comma-separated string like 'CMA, MON, ORI'",
-    )
-    parser.add_argument("--output", required=True, help="Output PNG path")
-    parser.add_argument("--target", default=None, help="Target constellation short name")
+    parser.add_argument("--path-json", required=True)
+    parser.add_argument("--output", required=True)
+    parser.add_argument("--target", default=None)
+
     args = parser.parse_args()
 
     path_items = parse_path_argument(args.path_json)
-    print(f"[path_builder] building image for path items: {path_items}")
-    build_path_image(path_items, args.output, target=args.target)
+
+    build_path_image(
+        path_items,
+        args.output,
+        target=args.target,
+    )
+
 
 if __name__ == "__main__":
     main()

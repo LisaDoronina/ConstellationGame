@@ -36,6 +36,7 @@ function ResultContent() {
   const start = searchParams.get("start") || "—"
   const target = searchParams.get("target") || "—"
   const rawPath = searchParams.get("path")
+  const rawMoveOwners = searchParams.get("moveOwners")
   const from = searchParams.get("from")
   const backHref = from === "profile" ? "/profile" : "/menu"
 
@@ -46,8 +47,17 @@ function ResultContent() {
     path = []
   }
 
+  let moveOwners = []
+  try {
+    moveOwners = rawMoveOwners ? JSON.parse(rawMoveOwners) : []
+  } catch {
+    moveOwners = []
+  }
+
   const imageUrl =
-    path.length > 0 ? `/api/path-image?path=${encodeURIComponent(JSON.stringify(path))}&target=${encodeURIComponent(target)}` : null
+    path.length > 0
+      ? `/api/path-image?path=${encodeURIComponent(JSON.stringify(path))}&target=${encodeURIComponent(target)}${moveOwners.length > 0 ? `&moveOwners=${encodeURIComponent(JSON.stringify(moveOwners))}` : ""}`
+      : null
 
   return (
     <main className="relative isolate min-h-screen bg-background">
