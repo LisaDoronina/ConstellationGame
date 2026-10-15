@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 
 const presetModes = [
-  { id: "easy", label: "Легкий", description: "5 жизней, подсказки, выбор из списка" },
+  { id: "easy", label: "Легкий", description: "5 жизней, подсказки, из списка" },
   { id: "normal", label: "Средний", description: "3 жизни, подсказки" },
   { id: "hard", label: "Сложный", description: "3 жизни, нет подсказок" },
 ]
@@ -20,13 +20,13 @@ const inputMethodChoices = [
 ]
 
 const actionButtonClass =
-  "pointer-events-auto z-50 whitespace-nowrap text-right text-4xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-6xl"
+  "pointer-events-auto fixed bottom-12 right-16 z-50 origin-right whitespace-nowrap text-right text-4xl uppercase tracking-[0.18em] text-foreground transition-all duration-200 hover:scale-105 hover:text-white md:text-6xl"
 
 const rulesButtonClass =
-  "absolute top-0 z-50 text-right right-0 text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
+  "fixed top-12 right-16 z-50 origin-right text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
 const userButtonClass =
-  "absolute top-0 z-50 text-left left-0 text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
+  "fixed top-12 left-16 z-50 text-left text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-all duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
 export default function MenuPage() {
   const [selectedMode, setSelectedMode] = useState("normal")
@@ -89,20 +89,18 @@ export default function MenuPage() {
         className="pointer-events-none fixed inset-0 -z-20 h-full w-full object-cover"
       />
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
-      <div className="mx-auto flex h-full w-full flex-col px-8 py-7 md:px-14 md:py-12">
-        <div className="relative">
-          <div className="pointer-events-none absolute inset-x-0 top-0 text-center whitespace-nowrap text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
-            Созвездия
-          </div>
-          <Link href="/rules?returnTo=/menu" className={rulesButtonClass}>
-            Правила
-          </Link>
-          <Link href={isLoggedIn ? "/profile" : "/login"} className={userButtonClass}>
-            {isLoggedIn ? username : "Вход"}
-          </Link>
+      <div className="mx-auto flex h-full w-full flex-col px-8 py-7 md:px-18 md:py-12">
+        <div className="pointer-events-none text-center whitespace-nowrap text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
+          Созвездия
         </div>
+        <Link href="/rules?returnTo=/menu" className={rulesButtonClass}>
+          Правила
+        </Link>
+        <Link href={isLoggedIn ? "/profile" : "/login"} className={userButtonClass}>
+          {isLoggedIn ? username : "Вход"}
+        </Link>
 
-        <div className="grid py-10 flex-1 gap-14 md:mt-24 md:grid-cols-[0.92fr_1.08fr] md:gap-12">
+        <div className="grid flex-1 gap-14 md:mt-14 md:grid-cols-[0.92fr_1.08fr] md:gap-12">
           <section className="pr-0 ml-10">
             <h2 className="mb-5 whitespace-nowrap text-5xl font-bold uppercase tracking-[0.1em] text-foreground">
               Режим игры
@@ -153,7 +151,7 @@ export default function MenuPage() {
 
               <div className="grid grid-cols-[auto_1fr] items-baseline gap-3">
                 <p className="whitespace-nowrap text-5xl leading-none tracking-[0.08em] text-white">Способ ввода</p>
-                <div className="flex flex-wrap justify-center gap-10">
+                <div className="flex flex-wrap justify-center gap-12">
                   {inputMethodChoices.map((method) => (
                     <button
                       key={method.id}
@@ -184,11 +182,9 @@ export default function MenuPage() {
           </section>
         </div>
 
-        <div className="pointer-events-none fixed bottom-10 right-14">
-          <Link href={gameUrl} className={actionButtonClass}>
-            Начать
-          </Link>
-        </div>
+        <Link href={gameUrl} className={actionButtonClass}>
+          Начать
+        </Link>
       </div>
     </main>
   )

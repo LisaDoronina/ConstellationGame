@@ -6,21 +6,17 @@ import { useRouter } from "next/navigation"
 import { allConstellations } from "../game/constellations-data"
 
 const topRightButtonClass =
-    "fixed top-7 right-8 z-50 text-right text-4xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white hover:scale-105 md:top-12 md:right-14 md:text-5xl"
+    "pointer-events-auto origin-right text-right text-5xl uppercase tracking-[0.18em] text-zinc-300 transition-colors duration-200 hover:text-white hover:scale-105 md:text-5xl"
 
 const topLeftUserClass =
-    "fixed top-7 left-8 z-50 text-left text-4xl uppercase tracking-[0.18em] text-zinc-300 md:top-12 md:left-14 md:text-5xl"
+    "pointer-events-auto text-left text-5xl uppercase tracking-[0.18em] text-zinc-300 md:text-5xl"
 
 const logoutButtonClass =
-    "fixed bottom-7 left-8 z-50 text-left text-3xl uppercase tracking-[0.14em] text-zinc-500 transition-all duration-200 hover:text-red-400 hover:scale-105 md:bottom-12 md:left-14 md:text-4xl"
+    "pointer-events-auto text-left text-5xl md:text-5xl uppercase tracking-[0.14em] text-zinc-500 transition-all duration-200 hover:text-red-400 hover:scale-105 md:text-4xl"
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081"
 
 function buildIdToNameMap() {
-  // Must match C++ std::map ordering (lexicographic by UTF-8 bytes).
-  // JS default .sort() compares by UTF-16 code units, which can differ from
-  // UTF-8 byte order for characters across the D0/D1 boundary (e.g. Орёл vs Орион).
-  // Use explicit byte-level comparison via TextEncoder to match C++ exactly.
   const encoder = new TextEncoder()
   const sorted = [...allConstellations].sort((a, b) => {
     const ba = encoder.encode(a)
@@ -247,7 +243,7 @@ export default function ProfilePage() {
   }
 
   return (
-      <main className="relative isolate h-screen bg-background px-8 py-7 md:px-14 md:py-12 overflow-x-hidden overflow-y-auto">
+      <main className="relative isolate min-h-screen bg-background">
         <img
             src="/background_v3.jpg"
             alt=""
@@ -256,22 +252,22 @@ export default function ProfilePage() {
         />
         <div className="pointer-events-none fixed inset-0 -z-10 bg-[#070b16]/65" />
 
-        <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col">
-          <div className="relative">
-            <h1 className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 whitespace-nowrap text-center text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
+        <div className="relative mx-auto flex min-h-screen w-full flex-col px-16 py-12">
+          <div className="relative flex items-start justify-center">
+            <div className={`absolute left-0 ${topLeftUserClass}`}>
+              {username}
+            </div>
+            <h1 className="pointer-events-none whitespace-nowrap text-center mr-20 text-6xl font-bold uppercase tracking-[0.22em] text-foreground md:text-7xl">
               История игр
             </h1>
             {gameHistory.length > 0 && (
-                <Link href="/menu" className={topRightButtonClass}>
+                <Link href="/menu" className={`absolute right-0 ${topRightButtonClass}`}>
                   К игре
                 </Link>
             )}
-            <div className={topLeftUserClass}>
-              {username}
-            </div>
           </div>
 
-          <div className="mt-28 flex flex-1 flex-col md:mt-32">
+          <div className="mt-20 flex flex-1 flex-col px-12 md:mt-14">
             {error && gameHistory.length === 0 ? (
                 <div className="flex flex-1 flex-col items-center justify-center">
                   <p className="text-4xl tracking-[0.08em] text-red-400">
@@ -297,7 +293,7 @@ export default function ProfilePage() {
                   </Link>
                 </div>
             ) : (
-                <div className="flex flex-col pb-20">
+                <div className="flex flex-col pb-24">
                   {gameHistory.map((game) => (
                       <GameHistoryItem
                           key={game.id}
@@ -336,7 +332,7 @@ export default function ProfilePage() {
           <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className={`${logoutButtonClass} ${isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`absolute bottom-12 left-16 ${logoutButtonClass} ${isLoggingOut ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {isLoggingOut ? "Выход..." : "Выйти"}
           </button>

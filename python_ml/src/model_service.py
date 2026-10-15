@@ -1,14 +1,13 @@
 import random
 
-import requests
+from openai import OpenAI
 import python_ml.resources.graph as graph
 import python_ml.src.config as cfg
 
 class ModelService:
-    def __init__(self, model_name=cfg.MODEL_NAME, url=cfg.MODEL_URL):
+    def __init__(self, model_name=cfg.MODEL_NAME, api_key=cfg.OPENAI_API_KEY):
         self.model_name = model_name
-        self.url = url
-        self.api_url = f"{url}/api/generate"
+        self.client = OpenAI(api_key=api_key, timeout=cfg.TIMEOUT)
 
     @staticmethod
     def get_neighbors(states):
@@ -76,21 +75,13 @@ class ModelService:
     def send_request(self, prompt):
 
         try:
-            payload = {
-                "model": self.model_name,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": cfg.TEMPERATURE,
-                    "num_predict": 500
-                }
-            }
-
-            response = requests.post(self.api_url, json=payload, timeout=cfg.TIMEOUT)
-            response.raise_for_status()
-
-            raw_response = response.json()
-            return raw_response
+            response = self.client.chat.completions.create(
+                model=self.model_name,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=cfg.TEMPERATURE,
+                max_tokens=500,
+            )
+            return response
         except Exception as e:
             print("[Model Service] ERROR BY SENDING REQUEST: ", e)
             return None
@@ -98,11 +89,11 @@ class ModelService:
     @staticmethod
     def parse_response(raw_response):
 
-        if raw_response is None or "response" not in raw_response:
+        if raw_response is None or not raw_response.choices:
             print("[Model Service] NO RESPONSE")
             return "No response received"
 
-        response = raw_response["response"].strip()
+        response = raw_response.choices[0].message.content.strip()
         if "*" in response:
             response = response.replace("*", "")
 

@@ -1,14 +1,10 @@
 # ConstellationGame
 
-**Ollama & Model setup:** 
+**Model setup (OpenAI):** 
 
 - install python dependencies ```pip install -r requirements.txt``` 
 
-- install ollama on https://ollama.ai
-
-- start Ollama service ```ollama serve```
-
-- pull the model ```ollama pull gemma3:12b```
+- copy ```.env.example``` to ```.env``` and set your OpenAI API key there ```OPENAI_API_KEY=sk-...```
 
 - to run tests ```python python_ml/test/test_model_service.py```
 

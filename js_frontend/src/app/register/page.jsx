@@ -117,7 +117,7 @@ export default function RegisterPage() {
           localStorage.setItem('userId', loginData.id)
           localStorage.setItem('isLoggedIn', 'true')
 
-          router.push('/profile')
+          router.push('/menu')
         } else {
           // Registration worked but auto-login failed
           setError("Регистрация успешна, но войдите самостоятельно")

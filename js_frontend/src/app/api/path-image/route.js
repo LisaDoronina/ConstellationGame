@@ -75,17 +75,18 @@ async function normalizeTarget(target) {
   return fullToShortNameMap[upper] || upper
 }
 
-async function generateImage(pathItems, outputPath, target) {
+async function generateImage(pathItems, outputPath, target, moveOwners) {
   const normalizedPathItems = await normalizePathItems(pathItems)
   const normalizedTarget = await normalizeTarget(target)
   const payload = JSON.stringify(normalizedPathItems)
   const targetArgs = normalizedTarget ? ["--target", normalizedTarget] : []
+  const moveOwnersArgs = moveOwners && moveOwners.length > 0 ? ["--move-owners", JSON.stringify(moveOwners)] : []
   const errors = []
   const candidates = [
-    { command: "py", args: ["-3.13", builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs], label: "py -3.13" },
-    { command: "py", args: ["-3", builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs], label: "py -3" },
-    { command: "python", args: [builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs], label: "python" },
-    { command: "py", args: [builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs], label: "py" },
+    { command: "py", args: ["-3.13", builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs, ...moveOwnersArgs], label: "py -3.13" },
+    { command: "py", args: ["-3", builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs, ...moveOwnersArgs], label: "py -3" },
+    { command: "python", args: [builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs, ...moveOwnersArgs], label: "python" },
+    { command: "py", args: [builderScript, "--path-json", payload, "--output", outputPath, ...targetArgs, ...moveOwnersArgs], label: "py" },
   ]
 
   console.log("[path-image] raw path items:", pathItems)
@@ -110,9 +111,11 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const rawPath = searchParams.get("path")
   const target = searchParams.get("target")
+  const rawMoveOwners = searchParams.get("moveOwners")
   console.log("[path-image] request url:", request.url)
   console.log("[path-image] raw query path:", rawPath)
   console.log("[path-image] target:", target)
+  console.log("[path-image] moveOwners:", rawMoveOwners)
 
   if (!rawPath) {
     console.error("[path-image] missing path query parameter")
@@ -128,10 +131,19 @@ export async function GET(request) {
     return new Response("Invalid path payload", { status: 400 })
   }
 
+  let moveOwners = []
+  if (rawMoveOwners) {
+    try {
+      moveOwners = JSON.parse(rawMoveOwners)
+    } catch {
+      console.error("[path-image] invalid moveOwners payload:", rawMoveOwners)
+    }
+  }
+
   const outputPath = path.join(os.tmpdir(), `constellation-path-${Date.now()}.png`)
 
   try {
-    await generateImage(pathItems, outputPath, target)
+    await generateImage(pathItems, outputPath, target, moveOwners)
     const image = await fs.readFile(outputPath)
     console.log("[path-image] image generated successfully")
     await fs.unlink(outputPath).catch(() => {})
